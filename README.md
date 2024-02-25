@@ -1,2 +1,2 @@
 # golangPractice
-Repositorio para guardar avances de aprendisaje y documentación sobre el lenguaje GO
+Repositorio para guardar avances de aprendizaje y documentación sobre el lenguaje GO
