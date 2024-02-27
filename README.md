@@ -652,7 +652,7 @@ func main() {
 ```
 En este ejemplo, la función sumar toma dos parámetros de tipo entero y devuelve la suma de estos dos números. Luego, en la función main, se invoca sumar con los valores 3 y 4 y se imprime el resultado.
 
-- **Múltiples Resultados de Retorno**: Go permite que una función devuelva múltiples valores.
+- **Múltiples Resultados de Retorno**: Go permite que una función devuelva múltiples valores y tambien permite nombrar estos valores.
 
 ```go
 func dividir(dividendo, divisor int) (cociente, resto int) {
@@ -705,8 +705,43 @@ func main() {
 }
 ```
 
+# Identificador vacio _
 
+El identificador vacio ( _ ) permite descartar valores retornados por una función que no se van a necesitar, es necesario asignar a este identificador cualquier valor que no se use ya que **Go no permite la declaración de variables que no se usen** ejemplo:
+```go
+func MaxMin(a, b int) (max int, min int) {
+    if a > b{
+        max = a
+        min = b
+    } else {
+        min = a
+        max = b
+    }
+    return
+}
+// si queremos descartar uno de los valores en el retorno
 
+max, _ :=MaxMin(3,6)
+```
+
+# Literales de función
+
+En Go las funciones son un tipo de dato tambien, asi que se pueden crear variables del tipo función, por ejemplo la siguiente variable apuntaria a una función que no recibe argumento y retorna un numero entero `var generador func() int`.
+> Las funciones son pasadas como referencia y no como valor
+A la variable anterior se le puede asignar un literal de función en cualquier parte del programa y se podrá invocar la función a través de dicha variable, los literales tambien pueden acceder a valores fuera de su ambito
+```go
+contador := 0
+generador = func() int {
+    contador++
+    return contador
+}
+fmt.Println("Generador contador:",
+            generador(), generador(), generador())
+```
+Lo anterior daria como resultado:
+```txt
+generador contador: 1, 2, 3
+```
 
 
 
