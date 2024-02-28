@@ -705,6 +705,9 @@ func main() {
 }
 ```
 
+
+
+
 # Identificador vacio _
 
 El identificador vacio ( _ ) permite descartar valores retornados por una función que no se van a necesitar, es necesario asignar a este identificador cualquier valor que no se use ya que **Go no permite la declaración de variables que no se usen** ejemplo:
@@ -743,14 +746,482 @@ Lo anterior daria como resultado:
 generador contador: 1, 2, 3
 ```
 
+# Estructuras de datos lineales
+
+Al igual que en la mayoria de lenguajes de programación GO permite crear agrupaciones de datos de un mismo tipo en una variable y acceder a ella segun el indice, estas agrupaciones son conocidas como lineales porque sus datos están ordenados segununa sola dimensión.
+
+Go permite crear dos tipos de datos lineales, los **vectores (arrays)** y las **porciones (slice)**, que definen vistas sobre otros vectores y proporcionan mayor dinamismo y manejabilidad
+
+
+# Vectores o Arrays:
+
+Un array en Go es una colección de elementos del mismo tipo que se guardan en espacios continuos de memoria con una longitud fija. 
+
+La longitud del array es parte de su tipo, lo que significa que no puede cambiar después de su creación y no se puede hacer operaciones con arrays que tengan distintas longitudes.
+
+```go
+// Declaración y creación de un array de enteros con longitud 3
+var miArray [3]int
+miArray[0] = 1
+miArray[1] = 2
+miArray[2] = 3
+```
+
+Tambien es posible definir matrices de vectores de diferentes dimensiones
+
+```go
+var tableroAjedrez [8][8]uint8
+```
+
+Los operadores de asignación (=) o declaración (:=) copian por valor el contenido de un vector
+
+# Porcione o Slices:
+
+Un slice es una porción flexible de un array. A diferencia de los arrays, los slices son dinámicos y su tamaño puede cambiar.
+
+```go
+// Creación de un slice
+miSlice := []int{1, 2, 3, 4, 5}
+
+// Agregar un elemento al final del slice
+miSlice = append(miSlice, 6)
+```
+Las principales diferencias entre un slice y un array son:
+- Si se asigna el valor de un slice a otro del mismo tipo con los operadores **= o :=**, lo valores del slice no se copiaran sino que ambos apuntaran al mismo ya que las variables **apuntan al mismo vector**.
+- El operador de comparación **==** solo regresara true si ambas apuntan al mismo slice.
+- A diferencia de un array el tamaño de un slice no hace parte de su tipo.
+- A partir de un slice se pueden crear sub slice tambien llamados vistas
+> Una de las diferencias mas grandes entre los array y los slice es que los slice operan por referencia y los array por valor, un slice internamente no se limita en sus elementos y puede crecer
+
+```go
+p := []int{1,2,3,4} // Slice
+v1 := [4]int{1,2,3,4} // array
+v2 := [...]int{1,2,3,4} //array
+```
+## Medir Dimensiones con len y cap
+Se puede medir las dimensiones de los slice con la función **len** la cual retorna el numero de elementos que contiene un slice.
+
+Se puede usar la función **cap** para saber la capacidad totasl de un slice, es decir cuantos elementos podrá almacenar hasta que sea necesario reservar mas espacio en memoria
+
+```go
+var sl []int
+fmt.Printf("Longitud %v. capacidad %v\n", len(sl), cap(sl))
+sl.append(sl, 1, 2, 3, 4)
+fmt.Printf("Longitud %v. capacidad %v\n", len(sl), cap(sl))
+sl.append(sl, 5)
+fmt.Printf("Longitud %v. capacidad %v\n", len(sl), cap(sl))
+```
+la salida del programa será:
+```txt
+Longitud 0. capacidad 0
+Longitud 4. capacidad 4
+Longitud 5. capacidad 8
+```
+Al principio la referencia del slice sl es **nil** ya que solo es declarado pero no inicializado.<br>
+Cuando se invoca **append** por primera vez se crea una porciaon en la que caben los argumentos sucesivos y se copian allá.<br>
+Como la congitud de la primera porción de memoria es igual a la capacidad total de elementos contenidos cuando se realiza un segundo **append** se crea un nuevo slice con el doble de capacidad y se copian los elementos del slice original y luego se añade el otro elemento
+
+## Controlar tamaño inicial con make
+
+El crecimiento dinamico de un slice puede ser perjudicial para el rendimiento de la aplicación ya que si no cuenta con suficiente capacidad para crecer deberá moverse a un nuevo espacio de memoria copiando cada uno de sus elementos, es por esto que si de antemano se conoce los requerimientos de la capacidad del slice la función **make** da la flexibilidad para crear un slice de una capacidad dada 
+`<slice> := make([]<tipo>, <longitud> [, <capacidad>] )`
+la capacidad es opcional, sin embargo, por convención se sugiere crear slice con longitud 0 con una capacidad especifica, por ejemplo:
+```go
+altaCapacidad := make([]float32, 0 ,2048)
+``` 
+El ejemplo anterior reservara una porción de memoria para 2048 numeros de tipo float32
+
+## Copiar slice con copy
+
+Teniendo en cuenta que los slice son tratados por referencia y no por valor como los array entonces es necesario usar la función copy para realizar un duplicado de los datos de un slice `func copy(destino, fuente[]T) int` <br>
+Si la fuente y destino tienen longitudes diferentes entonces solo se copian los elementos que quepan en la capacidad mas corta. <br>
+La función copy retorna la cantidad de numeros copiados
+```go
+original := []int{1, 2, 3, 4, 5}
+copia := make([]int, len(original) )
+n  := copy(copia, original)
+fmt.Println(n, "numeros copiados:", copia)
+```
+salida por pantalla
+```txt
+5 numeros copiados: {1, 2, 3, 4, 5}
+```
+## Crear vistas desde un slice
+
+Se pueden crear nuevos slice a partir de un slice existente indicando el indice inicial y el final separados por dos puntos (**:**) `<porcion>[<inicio>:<final>]` el indice de inicio es inclusivo y el final es exclusivo
+> una vista no copia valores solo hace una referencia a la zona de memoria.
+
+
+# Funciones con argumentos variables 
+
+Se pueden declarar funciones con un numero indeterminado de variables a ser operadas; para realizar esto se prefijan tres puntos seguidos (...) donde se declara el argumento, ejmplo: `func Suma(n ...int) int` la función Suma acepta un numero variable de argumentos de enteros, para trabajar con este tipo de argumentos se tratan como si fueran un **slice**
+```go
+func Suma(n ...int) int {
+    total := 0
+    for _, s := range n {
+        total += s
+    }
+    return total
+}
+```
+## El operador difusor (spread operator ...)
+
+Si se deseara pasar los valores de un slice a una función como la anterior se debe tener en cuenta que al ser tratados como referencia no se pueden agregar dirtectamente a los argumentos, para esto se usa el operador difusor **...** ejemplo:
+```go
+valores := []int{1, 2, 3, 4, 5, 6}
+total := Suma(valores...)
+```
+Tambien se puede usar el operador difusor para concatenar dos slice
+```go
+sl1 :=  []int{1,2,3}
+sl2 := []int{4,5,6}
+sl1 := append(s,sl2...)
+fmt.Println("Concatenación =",sl1)
+```
+```txt
+concatenación = [1 2 3 4 5 6]
+```
+
+# Cadenas de texto (Strings)
+
+Internamente las cadenas de texto son estructuras lineales de bytes que codifican texto bajo el estandar **UTF-8** los caracteres occidentales asi como la simbologia mas comun suelen ocupar un byte basandose en el antiguo codigo **ASCII** y carácteres especiales como tildes y demas ocuparan rangos de uno a cuatro bytes, a diferencia de los arrays y los slice los datos de un string son **inmutables** por lo tanto cualquier operación sobre un strign dará como resultado uno nuevo el cual es una copia con los cambios solicitados.
+- La comparación de cadenas se realizará caracter por caracter
+- los operadores de igualdad (==) o diferencia (!=) se pueden utilizar al igual que los operadores mayor (>) y menor que (<)
+- Aunque los string se tratan por referencia estos no pueden apuntar a nil, en vez de eso son inicializadas con un string vacio ""
+- La función len retorna la longitud del string en bytes, es decir no regresa el numero de caracteres sino la cantidad de bytes que usan estos caracteres segun el estandar **UTF-8**.
+- El operador **+** permite concatenar cadenas
 
 
 
+# Mapas
+
+Un mapa es una colección no ordenada de pares clave-valor, donde cada clave es única y puede ser de cualquier tipo, los datos son ordenados de manera lineal pero asociados a su clave en vez de a un indice, la forma de declarar un mapa es `<variable> := map[<tipo_clave>:]<tipo_valor>{}` o prerrellenando con algunas claves.
+`<variable> := map[<tipo_clave>]<tipo_valor>{ <clave_a> : <valor_a>, <clave_b> : <valor_b> }`
+
+```go
+// Creación de un mapa
+capitales := map[string]string{
+    "España": "Madrid",
+    "Colombia": "Bogotá",
+    "UK" : "Londres"
+}
+```
+
+- **Acceder a elementos**
+
+Para agregar un elemento a un mapa se debe continuar con el patron de creación `<mapa>[<clave>] = <valor>` si se elige una clave existente se sobre escribirá el valor.
+
+- **Eliminar valores**
+
+Para eliminar valores Go entrega la función delete la cual recibe un map y una clave como parametros `delete(<mapa>, <clave>)`
+
+- **Recorrer un mapa**
+
+Para recorrer todos los valores de un mapa se usa la función range de la siguiente manera
+```go
+capitales := map[string]string{
+    "España": "Madrid",
+    "Colombia": "Bogotá",
+    "UK" : "Londres"
+}
+for pais, capital := range capitales{
+    /*Codigo a repetir por cada objeto del mapa*/
+    fmt.Printf("La capital de %s es %s\n", pais, capital)
+}
+```
+
+# Conjuntos Struc
+
+Los conjuntos son estructuras de datos que nos permiten:
+- insertar elementos no duplicados
+- Eliminar elementos
+- Contar el numero de elementos
+- Comprobar si un elemento existe
+- Recorrer los elementos uno a uno
+
+En el siguiente ejemplo se muestran 6 numeros aleatorios pertenecientes a un sorteo de loteria por lo cual es importante que no se repitan, se utiliza un struct constroido a partir de un map cuya clave es un numero entero y su valor es una instancia de la estructura vacia **struct{}** 
+
+```go
+fmt.Println("Los numero ganadores de la loteria son:")
+numeros := map[int]stuct{}{}
+for len(numeros) < 6 {
+    n := rand.Intn(49) + 1
+    // solo se muestra el número si no ha salido antes
+    if _, ok := numeros[n]; !ok {
+        numeros[n] = struct{}{}
+        fmt.Println("El", n, "...")
+    }
+}
+fmt.Println("Felicidades a los ganadores!")
+```
+
+```go
+type Nodo struct {
+    Valor       int
+    Siguiente   *Nodo
+    Anterior    *Nodo
+}
 
 
+// Creación de una lista doblemente enlazada
+nodo1 := Nodo{Valor: 1}
+nodo2 := Nodo{Valor: 2}
+nodo1.Siguiente = &nodo2
+nodo2.Anterior = &nodo1
+```
+
+5. Colas y Pilas:
+
+Puedes implementar colas y pilas utilizando slices y aplicando las operaciones apropiadas.
+
+```go
+// Implementación de una cola (FIFO)
+miCola := []int{1, 2, 3}
+miCola = append(miCola, 4)       // Encolar
+primerElemento := miCola[0]       // Desencolar
+
+// Implementación de una pila (LIFO)
+miPila := []int{1, 2, 3}
+miPila = append(miPila, 4)        // Apilar
+ultimoElemento := miPila[len(miPila)-1]  // Desapilar
+```
+
+# Organización de codigo Paquetes y Modulos
+
+## Paquetes
+
+Un paquete (package) es un conjunto de archivos dentro de un mismo directorio que agrupa funciones, variables globales, constantes, estructuras de datos definidas, cada paquete **se identifica mediante un nombre y una ruta al directorio que contiene dichos archivos**
+
+Un directorio solo puede contener archivos de un mismo paquete, pero los subdirectorios pueden contener otros paquetes.
+
+Cada paquete debe tener un nombre breve, autoexplicativo y no ambiguo ...
+
+para usar los tipos de datos, variables, funciones etc de otro paquete se debe incorporar dichos paquetes con la directiva import
+
+```go
+import "fmt"
+import "net"
+import "math/rand"
+```
+La forma recomendada de incorporar multiples paquetes es agrupandolos sobre la misma directiva import
+```go
+import (
+    "fmt"
+     "net"
+     "math/rand"
+)
+```
+Go no permite importar paquetes que no se usen, fallaria en momento de compilación
+
+Cuando se usan funciones, tipos, variables etc proporcionadas por un paquete se debe utilizar la notación de punto para utilizarlas
+
+```go
+fmt.Println("hola")
+sb := strings.Builder{}
+a := rand.Int()
+```
+
+## Módulos
+
+Un módulo es una colección de paquetes agrupados en un mismo arbol de directorios. Un módulo puede contener una biblioteca de funciones como un programa por completo con su funcion **main**
+
+El directorio raiz de cada modulo contiene un archivo llamado **go.mod** que sigue el formato de la siguiente plantilla:
+
+```go
+module <ruta del modulo>
+
+go <version>
+
+require (
+    <lista de dependencias a otros modulos>
+)
+```
+La ruta del modulo suele ser una ruta web (sin el http) al repositorio de codigo donde el módulo está accesible. Por ejemplo:
+
+`module github.com/stretchr/testify`
+
+La linea `go <version>` indica la version minima de Go requerida para compilar el modulo
+
+La sección `require` permite definir dependencias a otros modulos.
+
+## Creando modulos y paquetes
+
+El primer paso es crear el archivo **go.mod**, si bien este archivo se puede crear de manera manual es recomendable usar el comando `go mod init <ruta del modulo>`, por ejemplo se puede crear una carpeta **mimodulo** que contendrael modulo a crear y ejecutar el siguiente comando
+```bash
+go mod init kenji.info/mimodulo
+```
+salida: 
+```txt
+go: creating new go.mod: module kenji.info/mimodulo
+```
+Este comando crearia un archivo go.mod con el nombre dado, sin ningun otro modulo a importar en la seccion require
+
+El siguiente paso es crear en la carpeta **mimodulo** una subcarpeta **hola**; y en esta crear un archivo hola.go con el siguiente contenido 
+
+```go
+// Package hola implementa maneras de saludar
+package hola
+
+import "fmt"
+
+// Con nombre retorna un efusivo saludo al nombre pasado como argumento
+func ConNombre(nombre string) string {
+	return fmt.Sprintf("¡Hola, %s",nombre)
+}
+```
+
+# Importando paquetes del modulo local
+
+Para importar los paquetes que se encuentran por defecto en las librerias de Go basta con incluir el nombre del paquete a la directiva import, cuando se importa un paquetede un modulo propio o externo se indica la ruta del modulo enfrente de el seguido de la ruta del paquete.
+
+continuando el ejemplo1 para incorporar el paquete creado crearemos un archivo llamado main.go en la carpeta raiz del modulo con el siguiente contenido 
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"kenji.info/mimodulo/mimodulo/hola"
+)
+func main() {
+	fmt.Print("¿Cómo te llamas?: ")
+	var nombre string
+	fmt.Scanln(&nombre)
+	fmt.Println(hola.ConNombre(nombre))
+}
+```
+
+Salida:
+
+```txt
+¿Cómo te llamas?: Oscar
+¡Hola, Oscar
+```
+Del anterior codigo se puede evidenciar lo siguiente
+- fmt es un modulo estandar de Go y no necesita mas que un nombre para que go sepa donde buscar.
+- Cualquier otro paquete deberá concatenar el nombre del modulo `kenji.info/mimodulo/mimodulo` y el nombre del paquete `/hola`
+- Igual al invocar las funciones del paquete el nombre del paquete se deberá añadir seguido de un punto antes de la función.
+
+El arbol de directorios del modulo creado sería
+```txt
+mimodulo/
+    - hola
+        hola.go
+    go.mod
+    main.go
+```
+el nuevo modulo se ejecutara desde el directorio [ejemplo1](./ejemplo1/) como cualquier otro programa de go.
+```bash
+go run main.go
+# O para generar un ejecutable
+go build -o mi-ejecutable main.go 
+
+```
+
+## Incorporando pauetes externos
+
+Vamos a añadir una funcionalidad al ejemplo anteriror, a demas de saludar el programa mostrara unas estadisticas sobre el nombre introducido, dicha funcionalidad ya se encuentra creada en un modulo externo y publicamente disponible (Del autor del libro Programación en Go Mario Macias Lloret) llamado github.com/mariomac/analizador, que proporciona la funcion analizador.PrintEstadistica.
+
+La manera mas facil de incorporar el modulo es importarlo en el paquete que lo usa e invocar la función que se va a usar al final del mismo, en este caso main.
 
 
+```go
+package main
 
+import (
+	"fmt"
+
+	"github.com/mariomac/analizador"
+	"kenji.info/mimodulo/mimodulo/hola"
+	
+)
+func main() {
+    fmt.Print("¿Cómo te llamas?: ")
+	var nombre string
+	fmt.Scanln(&nombre)
+	fmt.Println(hola.ConNombre(nombre))
+
+	analizador.PrintEstadistica(nombre)
+}
+```
+Es posible que go descargue automaticanme el modulo de no ser asi entonces se debe descargar con `go get github.com/mariomac/analizador`
+
+```txt
+go: downloading github.com/mariomac/analizador v1.0.0
+go: downloading github.com/mariomac/sumadormapa v1.0.0
+go: added github.com/mariomac/analizador v1.0.0
+go: added github.com/mariomac/sumadormapa v1.0.0
+¿Cómo te llamas?: Oscar
+¡Hola, Oscar
+La palabra "Oscar" contiene:
+         - 1 mayúsculas
+         - 4 minúsculas
+         - 2 vocales
+         - 3 consonantes
+Histograma de letras:
+        A : 1 apariciones
+        C : 1 apariciones
+        O : 1 apariciones
+        R : 1 apariciones
+        S : 1 apariciones
+```
+
+## Copias locales de modulos
+
+Hay ventajas y desventajas en la libertad de poder compartit y usar modulos y un a de esas es la indisponibilidad del mismo, es por eso que go ofrece la opción de realizar la descarga de estos modulos de manera local para evitar problemas en el programa, para guardar una copia local de los modulos externos en un proyecto se usa el siguiente comando
+`go mod vendor`
+Si se ejecuta el comando en el ejemplo anterior el arbol de directorios quedara de la siguiente manera
+```txt
+mimodulo/
+    - hola
+        hola.go
+    - vendor
+        - github.com
+            mariomac
+                - analizador
+                    LICENSE
+                    analizador.go
+                    .gitignore
+                - sumadormapa
+                    - sumador
+                        suma.go
+                    LICENSE
+        modules.txt
+    go.mod
+    go.sum
+    main.go
+```
+
+## Elementos publicos y privados
+
+Go permite crear elementos publicos y privados bajo la siguiente regla:
+- Cualquer funcion, variable, constante, tipo de dato etc cuyo nombre comience en **minuscula** será considerado **privado a nivel de paquete**, es decir solo se podra acceder a el desde el mismo paquete
+- Cualquier función, variable, sontante, tipo de dato o atributo que comience con **mayuscula** será considerado **publico**
+
+# Alias de paquete
+
+Es posible que dos paquetes de diferentes modulos tengan el mismo nombre, esto generaría muchos problemas no solo al momento de escribir el codigo sino posibles fallos de compilación, es posible asignar un alias a un modulo indicando el alias delante de la ruta de importación ejemplo:
+```go
+package main
+
+import (
+    "fmt"
+    "kenji.info/paquete/destruir"
+    "ejdest github.com/ejemplo/destruir"
+)
+```
+
+## La función init
+
+Cada paquete de Go  puede definir una funcion especial init() 
+
+Esta funcióin puede declarar codigo de inicialización que se ejecutará una sola vez en el paquete durante la inicialización o carga.
+
+Cuando un paquete se inicializa, se realiza lo siguiente:
+1. Recursivamente inicializa primero todos los paquetes que hayan sido importados desde el paquete.
+2. Computa y asigna los recursos y valores iniciales para las variables globales declaradas en el paquete.
+3. ejecuta la función init() del paquete
 
 
 
