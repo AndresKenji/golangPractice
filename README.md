@@ -1223,12 +1223,441 @@ Cuando un paquete se inicializa, se realiza lo siguiente:
 2. Computa y asigna los recursos y valores iniciales para las variables globales declaradas en el paquete.
 3. ejecuta la función init() del paquete
 
+# Definición de Tipos de Datos
+
+Al igual que se definen funciones, constantes y variables, tambien es posible definir tipos de datos con la directiva **type** `type <nombre> <definicion>` <br>
+Es posible definir un tipo de dato a partir de otro tipo de dato, por ejemplo asi se define el tipo Edad, representado por un valor entre 0 y 255: 
+`type Edad uint8`
+> El tipo Edad es igual a un tipo uint8 y se podrá realizar las mismas operaciones con el, sin embargo, el tipo edad aporta un significado semantico al dato.
+para inicializar una variable de tipo edad se realiza de la misma forma que con cualquier tipo de dato:
+`var adulto Edad = 18` o `jubilado := Edad(65)`
+
+## Definición de tipos a partir de un slice
 
 
+```go
+package main
+
+import "fmt"
+
+// Definición de un tipo basado en slice de enteros
+type Enteros []int
+
+// Método personalizado para sumar todos los elementos del slice
+func (e Enteros) Sumar() int {
+    suma := 0
+    for _, valor := range e {
+        suma += valor
+    }
+    return suma
+}
+
+func main() {
+    numeros := Enteros{1, 2, 3, 4, 5}
+    resultado := numeros.Sumar()
+    fmt.Println("La suma de los números es:", resultado)
+}
+
+```
+
+## Definición de Tipos Map
+
+```go
+package main
+
+import "fmt"
+
+// Definición de un tipo basado en map de strings a ints
+type Puntuaciones map[string]int
+
+// Método personalizado para obtener la puntuación total
+func (p Puntuaciones) PuntuacionTotal() int {
+    suma := 0
+    for _, valor := range p {
+        suma += valor
+    }
+    return suma
+}
+
+func main() {
+    puntuaciones := Puntuaciones{
+        "Juan":  90,
+        "Maria": 85,
+        "Carlos": 88,
+    }
+
+    total := puntuaciones.PuntuacionTotal()
+    fmt.Println("Puntuación total:", total)
+}
+
+```
+
+## Definición de Tipos Función
+
+```go
+package main
+
+import "fmt"
+
+// Definición de un tipo de función que toma dos enteros y retorna un entero
+type OperacionFunc func(int, int) int
+
+// Función que suma dos números
+func Sumar(a, b int) int {
+    return a + b
+}
+
+// Función que resta dos números
+func Restar(a, b int) int {
+    return a - b
+}
+
+func main() {
+    // Uso de tipos de función
+    var suma OperacionFunc = Sumar
+    var resta OperacionFunc = Restar
+
+    resultadoSuma := suma(5, 3)
+    resultadoResta := resta(8, 2)
+
+    fmt.Println("Resultado de la suma:", resultadoSuma)
+    fmt.Println("Resultado de la resta:", resultadoResta)
+}
+
+```
 
 
+# Tipos de datos estructurados struct
 
+En Go, struct es una estructura de datos compuesta que te permite agrupar diferentes tipos de datos bajo un solo nombre. 
 
+Es una forma de definir un tipo de dato personalizado que puede contener campos con diferentes tipos. Aquí tienes algunos detalles sobre cómo trabajar con struct:
+
+- **Definición de un Struct:**
+Para definir un struct, puedes utilizar la palabra clave type seguida del nombre del tipo (struct), y luego especificar los nombres y tipos de los campos.
+
+```go
+package main
+
+import "fmt"
+
+// Definición de un struct llamado Persona
+type Persona struct {
+    Nombre string
+    Edad   int
+    Altura float64
+}
+```
+En este ejemplo, hemos creado un struct llamado Persona con tres campos: Nombre (cadena de texto), Edad (entero) y Altura (número de punto flotante).
+
+- **Creación de Instancias de un Struct:**
+Para crear una instancia de un struct, puedes utilizar la siguiente sintaxis:
+
+```go
+// Creación de una instancia de Persona
+juan := Persona{
+    Nombre: "Juan",
+    Edad:   30,
+    Altura: 1.75,
+}
+```
+
+- **Acceso a los Campos de un Struct:**
+Puedes acceder a los campos de un struct utilizando la notación de punto (.):
+
+```go
+fmt.Println("Nombre:", juan.Nombre)
+fmt.Println("Edad:", juan.Edad)
+fmt.Println("Altura:", juan.Altura)
+```
+
+- **Modificación de Campos de un Struct:**
+Los campos de un struct son mutables, por lo que puedes modificar sus valores:
+
+```go
+// Modificación de la edad
+juan.Edad = 31
+fmt.Println("Nueva Edad:", juan.Edad)
+```
+
+- **Campos Anónimos y Promoción de Campos:**
+Go permite tener campos anónimos en un struct, lo que significa que puedes incrustar un tipo directamente sin especificar un nombre de campo.
+
+```go
+type Contacto struct {
+    Email    string
+    Telefono string
+}
+
+type PersonaConContacto struct {
+    Persona   // Campo anónimo
+    Contacto  // Campo anónimo
+    Profesion string
+}
+
+// Creación de una instancia de PersonaConContacto
+personaConContacto := PersonaConContacto{
+    Persona: Persona{
+        Nombre: "Maria",
+        Edad:   28,
+        Altura: 1.65,
+    },
+    Contacto: Contacto{
+        Email:    "maria@example.com",
+        Telefono: "555-1234",
+    },
+    Profesion: "Ingeniera",
+}
+
+// Acceso a los campos anónimos
+fmt.Println("Nombre:", personaConContacto.Nombre)
+fmt.Println("Telefono:", personaConContacto.Telefono)
+```
+En este ejemplo, PersonaConContacto tiene campos anónimos Persona y Contacto, lo que significa que los campos de Persona y Contacto son promovidos directamente a PersonaConContacto, y puedes acceder a ellos directamente.
+
+- **Métodos en Structs:**
+Puedes asociar métodos a un struct en Go. Estos métodos se definen con la sintaxis func (receptor Tipo) NombreDelMetodo().
+
+```go
+func (p Persona) Saludar() {
+    fmt.Println("Hola, soy", p.Nombre)
+}
+
+// Uso del método Saludar
+juan.Saludar()
+```
+
+Los métodos en Go son funciones asociadas a un tipo específico, y el receptor (p Persona en este caso) actúa como una variable de ese tipo.
+
+# Interfaces
+
+Las interfaces en Go proporcionan un medio para especificar comportamiento sin describir la implementación concreta. A continuación, se detallan los aspectos clave relacionados con las interfaces en Go:
+
+- **Definición de Interfaces**:
+En Go, una interfaz es una colección de métodos. Una interfaz se define utilizando la palabra clave type seguida de un nombre y la palabra clave interface. A continuación, se incluyen algunos ejemplos:
+
+```go
+// Definición de una interfaz llamada Saludable
+type Saludable interface {
+    Saludar() string
+}
+
+// Definición de una interfaz con múltiples métodos
+type Volador interface {
+    Despegar()
+    Volar() string
+    Aterrizar()
+}
+```
+
+En el primer ejemplo, la interfaz Saludable tiene un solo método Saludar(). En el segundo ejemplo, la interfaz Volador tiene tres métodos.
+
+- **Implementación de Interfaces:**
+Un tipo implementa una interfaz si proporciona implementaciones para todos los métodos de la interfaz. No se necesita una declaración explícita de que un tipo implementa una interfaz; se realiza de manera implícita.
+
+```go
+// Implementación de la interfaz Saludable para el tipo Persona
+type Persona struct {
+    Nombre string
+}
+
+func (p Persona) Saludar() string {
+    return "Hola, soy " + p.Nombre
+}
+
+// Implementación de la interfaz Volador para el tipo Pajaro
+type Pajaro struct {
+    Especie string
+}
+
+func (p Pajaro) Despegar() {
+    fmt.Println("El pájaro despega.")
+}
+
+func (p Pajaro) Volar() string {
+    return "El pájaro vuela elegante."
+}
+
+func (p Pajaro) Aterrizar() {
+    fmt.Println("El pájaro aterriza suavemente.")
+}
+```
+
+En este ejemplo, Persona implementa la interfaz Saludable, ya que proporciona una implementación del método Saludar(). Similarmente, Pajaro implementa la interfaz Volador con los métodos Despegar(), Volar(), y Aterrizar().
+
+- **Comprobación de Interfaces:**
+Puedes comprobar si un tipo implementa una interfaz utilizando una aserción de tipo.
+
+```go
+var alguien Saludable
+alguien = Persona{Nombre: "Juan"}
+
+// Comprobación de la interfaz y llamada al método
+if saludable, ok := alguien.(Saludable); ok {
+    fmt.Println(saludable.Saludar())
+}
+```
+
+En este ejemplo, verificamos si la variable alguien implementa la interfaz Saludable. Si es así, podemos llamar al método Saludar().
+
+- **Empty Interface (interface{}):**
+Una interfaz vacía, escrita como interface{}, no especifica ningún método y, por lo tanto, puede contener valores de cualquier tipo. Es utilizada en situaciones donde se necesita una flexibilidad máxima.
+
+```go
+// Uso de una interfaz vacía
+var datos interface{}
+datos = 42
+fmt.Println(datos)
+
+datos = "Hola, mundo"
+fmt.Println(datos)
+```
+
+- **Interfaces Incorporadas:**
+Go proporciona varias interfaces incorporadas en su biblioteca estándar, como Stringer, Reader, Writer, entre otras. Estas interfaces facilitan la interoperabilidad entre diferentes paquetes.
+
+- **Interfaces y Polimorfismo:**
+Las interfaces en Go permiten el polimorfismo, lo que significa que puedes tratar diferentes tipos de manera uniforme si implementan la misma interfaz. Esto facilita la creación de código más flexible y extensible.
+
+```go
+func SaludarAlguien(saludable Saludable) {
+    fmt.Println(saludable.Saludar())
+}
+
+juan := Persona{Nombre: "Juan"}
+maria := Persona{Nombre: "Maria"}
+
+SaludarAlguien(juan)
+SaludarAlguien(maria)
+```
+
+Aquí, la función SaludarAlguien puede saludar a cualquier tipo que implemente la interfaz Saludable, lo que facilita el uso de polimorfismo.
+
+- **Consideraciones Finales:**
+Las interfaces en Go promueven el diseño basado en la conducta y la composición sobre la herencia.
+Una interfaz puede ser implementada por cualquier tipo, incluso tipos definidos por el usuario.
+Go favorece la simplicidad y la claridad en el diseño de interfaces.
+
+# Manejo de errores 
+
+La gestión de errores en Go se basa en el uso de valores de error y en la convención de devolver un valor de error adicional junto con el resultado de una función que puede fallar. Aquí tienes una descripción completa de cómo se manejan los errores en Go:
+
+- **Valores de Error en Go:**
+
+En Go, los errores son representados por el tipo error, que es una **interfaz** con un único método Error() string. Esto significa que cualquier tipo que implemente un método Error() puede ser utilizado como un valor de error.
+
+```go
+type error interface {
+    Error() string
+}
+```
+
+- **Devolución de Errores desde Funciones:**
+Cuando una función puede producir un error, se acostumbra a devolver un valor de error como último parámetro. **Si todo está bien, el valor de error es nil.** En caso de error, el valor de error contendrá información sobre lo que salió mal.
+
+```go
+func dividir(a, b int) (int, error) {
+    if b == 0 {
+        return 0, errors.New("no es posible dividir por cero")
+    }
+    resultado := a / b
+    return resultado, nil
+}
+```
+
+En este ejemplo, la función dividir devuelve dos valores: el resultado de la división y un valor de error. Si b es igual a cero, se devuelve un nuevo error creado con errors.New.
+
+- Comprobación de Errores:
+Cuando se llama a una función que puede producir un error, se debe comprobar si el valor de error es nil antes de utilizar el resultado.
+
+```go
+resultado, err := dividir(10, 2)
+if err != nil {
+    fmt.Println("Error:", err)
+} else {
+    fmt.Println("Resultado:", resultado)
+}
+```
+
+- **Manejo de Errores con if:**
+La comprobación de errores con if es una práctica común en Go. Se verifica si el valor de error es nil para determinar si la operación tuvo éxito.
+
+```go
+archivo, err := os.Open("archivo.txt")
+if err != nil {
+    fmt.Println("Error al abrir el archivo:", err)
+} else {
+    // Operaciones con el archivo
+    defer archivo.Close()
+}
+```
+
+- **Funciones panic y recover:**
+**panic** se utiliza para indicar un error irreparable, y recover se utiliza para manejar la recuperación de pánicos. Estas funciones se utilizan principalmente en situaciones excepcionales y no son el método preferido para gestionar errores normales.
+
+```go
+func ejemploPanic() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("Recuperado de:", r)
+        }
+    }()
+
+    // Simulando un error irreparable
+    panic("Esto es un pánico")
+}
+
+// Llamando a la función que puede entrar en pánico
+ejemploPanic()
+```
+
+- **Paquete errors:**
+El paquete errors proporciona la función New para crear nuevos errores. También incluye la función Is para comparar errores y determinar si son iguales.
+
+```go
+err1 := errors.New("Error 1")
+err2 := errors.New("Error 2")
+
+if errors.Is(err1, err2) {
+    fmt.Println("Los errores son iguales")
+} else {
+    fmt.Println("Los errores son diferentes")
+}
+```
+
+- **Manejo Avanzado de Errores:**
+Go permite definir tipos de error personalizados implementando la interfaz error. Esto puede proporcionar información adicional sobre el error.
+
+```go
+type MiError struct {
+    Mensaje string
+}
+
+func (e *MiError) Error() string {
+    return "Error personalizado: " + e.Mensaje
+}
+
+func operacion() error {
+    return &MiError{Mensaje: "Algo salió mal"}
+}
+```
+
+- **El Paquete fmt y Errorf:**
+El paquete fmt proporciona la función Errorf, que es útil para crear errores formateados con formato similar a fmt.Printf.
+
+```go
+numero := 42
+err := fmt.Errorf("Error: el número %d es inválido", numero)
+fmt.Println(err)
+```
+
+- **Consideraciones Finales:**
+La gestión de errores en Go se basa en valores de error.
+Utiliza el segundo valor de retorno para indicar errores.
+Verifica siempre el valor de error después de llamar a una función que puede fallar.
+El manejo de errores se realiza mediante comprobaciones con if y defer.
+Evita el uso excesivo de panic y recover para errores normales.
+Puedes definir tipos de error personalizados para mayor claridad.
 
 
 
