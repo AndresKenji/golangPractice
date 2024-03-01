@@ -5,6 +5,8 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"kenji.goapi/goapi/db"
+	"kenji.goapi/goapi/models"
 	"kenji.goapi/goapi/routes"
 )
 
@@ -12,6 +14,11 @@ import (
 
 
 func main() {
+
+	db.DBConnection()
+	db.DB.AutoMigrate(models.Task{})
+	db.DB.AutoMigrate(models.User{})
+	
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", routes.HomeHandler)
