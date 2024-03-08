@@ -8,7 +8,7 @@ import (
 )
 
 var DB *gorm.DB
-var DSN = "host=localhost user=admin password=admin dbname=gorm port=5432"
+var DSN = "host=localhost user=kenji password=880106Postgres dbname=gorm port=5432"
 
 func DBConnection() {
 	var error error
