@@ -17,7 +17,7 @@ func main() {
 		ParseTime:            true,
 	}
 
-	sqlStorage := NewMYSQLStorage(cfg)
+	sqlStorage := NewMySQLStorage(cfg)
 
 	db, err := sqlStorage.Init()
 	if err != nil {
@@ -25,9 +25,9 @@ func main() {
 	}
 
 	store := NewStore(db)
-	api := NewAPIServer(":3000", store)
-	api.Serve()
-}
 
+	server := NewAPIServer(":3000", store)
+	server.Serve()
+}
 
 // https://www.youtube.com/watch?v=2JNUmzuBNV0&list=PL5I1bZZq1Y9yjLHR72TS9xMkt6_2vXAWy&index=18
