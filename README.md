@@ -2263,3 +2263,4 @@ Estos son solo algunos ejemplos básicos de cómo trabajar con gorutinas en Go. 
 [golang-os-docs]:https://pkg.go.dev/os
 [golang-bufio-docs]:https://pkg.go.dev/bufio
 [golang-goroutines-doc]:https://go.dev/tour/concurrency/1
+[gobyexample]:https://gobyexample.com/
