@@ -1659,7 +1659,607 @@ El manejo de errores se realiza mediante comprobaciones con if y defer.
 Evita el uso excesivo de panic y recover para errores normales.
 Puedes definir tipos de error personalizados para mayor claridad.
 
+## Defer
+
+La palabra clave **defer** en **Go** se utiliza para posponer la ejecución de una función hasta que la función circundante haya completado su ejecución, ya sea de manera normal o debido a un **pánico**. defer se utiliza principalmente para realizar acciones de limpieza o liberar recursos al final de una función.
+
+Cuando se usa defer <u>antes de una llamada a función, esa función no se ejecutará inmediatamente,</u> sino que se programará para ejecutarse al final de la función circundante.
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Inicio de la función principal")
+
+    // Defer se utiliza para posponer la ejecución de la función hasta que main haya terminado
+    defer fmt.Println("Defer 1")
+
+    // Otras operaciones
+    fmt.Println("Operación 1")
+    fmt.Println("Operación 2")
+
+    // Defer se utiliza para posponer la ejecución de la función hasta que main haya terminado
+    defer fmt.Println("Defer 2")
+
+    fmt.Println("Fin de la función principal")
+}
+```
+- Salida `go run pruebadefer.go`
+```txt
+Inicio de la función principal
+Operación 1
+Operación 2
+Fin de la función principal
+Defer 2
+Defer 1
+```
+> Observa que las funciones diferidas se ejecutan en orden inverso al que fueron registradas. Esto se debe a que las funciones diferidas se colocan en una pila y se ejecutan en orden LIFO (último en entrar, primero en salir).
+
+**Utilidad Principal:**
+
+La principal utilidad de defer es garantizar que ciertas operaciones, como **cerrar archivos, liberar recursos o realizar acciones de limpieza**, se realicen antes de que la función que las contiene termine, independientemente de cómo termine esa función (ya sea con un retorno normal o debido a un pánico).
+
+**Uso Común:**
+
+Un ejemplo común de uso de defer es cerrar un archivo después de abrirlo:
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	archivo, err := os.Open("ejemplo.txt")
+	if err != nil {
+		fmt.Println("Error al abrir el archivo:", err)
+		return
+	}
+	defer archivo.Close()
+
+	// Operaciones con el archivo
+	fmt.Println("Archivo abierto correctamente.")
+	// ...
+}
+
+```
+> En este ejemplo, defer archivo.Close() asegura que el archivo se cerrará correctamente al final de la función main, independientemente de cómo se salga de la función.
+
+**Consideraciones Importantes:**
+
+- La expresión que sigue a defer se evalúa inmediatamente, pero la llamada a la función no se realiza hasta que la función circundante completa su ejecución.
+- defer es útil para manejar situaciones donde la liberación de recursos o acciones de limpieza debe realizarse incluso si se produce un pánico en el código.
+- No abusar de defer en situaciones donde un código más claro y simple sin defer sea preferible.
+- Puedes tener múltiples funciones diferidas en una función y se ejecutarán en el orden inverso de su declaración.
 
 
+# Entrada/salida de datos
+
+## Interfaces io.Writer e io.Reader
+
+**io.Writer** e **io.Reader** son interfaces en Go que proporcionan abstracciones para escribir y leer datos, respectivamente. Estas interfaces son fundamentales en el manejo de operaciones de **entrada/salida de datos** en Go, ya que permiten una flexibilidad considerable al trabajar con diferentes fuentes y destinos de datos.
+
+Cualquier flujo de salida que permita escribir datos binarios implementa la interfaz **io.Writer**
+```go
+ type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+ ```
+El método Write intentara transmitir el slice o porción que se pasa como argumento y retornara el número de bytes que se lograron transmitir (len(p), es posible que el sistema subyacente no logre enviar todos los bytes) o retornará un error en dado caso que la transmisión no se logre realizar.
+
+Un ejemplo común de io.Writer es un archivo que implementa la interfaz para permitir la escritura de datos en el archivo:
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	archivo, err := os.Create("output.txt")
+	if err != nil {
+		fmt.Println("Error al crear el archivo:", err)
+		return
+	}
+	defer archivo.Close()
+
+	mensaje := []byte("Hola, esto es un ejemplo de io.Writer.")
+	_, err = archivo.Write(mensaje)
+	if err != nil {
+		fmt.Println("Error al escribir en el archivo:", err)
+		return
+	}
+
+	fmt.Println("Datos escritos en el archivo correctamente.")
+}
+```
+
+Cualquier flujo que permite obntener un slice de bytes implementa la interfaz **io.Reader**
+- La interfaz io.Reader está definida como:
+
+```go
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+```
+
+Un tipo que implementa esta interfaz **puede leer bytes desde una fuente**. La función Read toma un slice de bytes y devuelve la cantidad de bytes leídos y un error, si lo hay.
+
+Un ejemplo común de io.Reader es un archivo que implementa la interfaz para permitir la lectura de datos desde el archivo
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	archivo, err := os.Open("input.txt")
+	if err != nil {
+		fmt.Println("Error al abrir el archivo:", err)
+		return
+	}
+	defer archivo.Close()
+
+	buffer := make([]byte, 1024)
+	n, err := archivo.Read(buffer)
+	if err != nil {
+		fmt.Println("Error al leer el archivo:", err)
+		return
+	}
+
+	datos := buffer[:n]
+	fmt.Printf("Datos leídos del archivo: %s\n", datos)
+}
+
+```
+Read lee hasta len(p) bytes dependiendo de la cantidad de bytes que esten disponibles para leer, los flujos de entrada son finitos es decir que se puede llegar al final de ellos, cuando esto sucede la operación retornara un 0 y un error especial guardado en la variable global **io.EOF (End Of File)**.
+
+La variable global **io.Stdin** implementa un flujo de entrada que apunta a la entrada estandar que por lo general es el teclado, se puede usar como alternativa a **fmt.Scanf**:
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+func main(){
+    fmt.Print("Escribe 10 caracteres")
+    // Read lee hasta len(datos)
+    datos := make([]byte,10)
+    n, err := os.Stdin.Read(datos)
+    if err != nil {
+        fmt.Print("Error leyendo",err)
+        return
+    }
+    fmt.Print("Leidos", n,"bytes",string[datos])
+}
+```
+
+## Archivos de disco
+
+**os.File** en Go es un tipo que representa un descriptor de archivo y proporciona métodos para realizar operaciones de entrada/salida en un archivo. Es parte del paquete os, y se utiliza para abrir, leer, escribir y realizar otras operaciones en archivos del sistema de archivos.
+
+**Abrir un Archivo:**
+Puedes abrir un archivo utilizando la función os.Open:
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	archivo, err := os.Open("ejemplo.txt")
+	if err != nil {
+		fmt.Println("Error al abrir el archivo:", err)
+		return
+	}
+	defer archivo.Close()
+
+	fmt.Println("Archivo abierto correctamente.")
+}
+```
+> Aquí, os.Open devuelve un puntero a un os.File que representa el archivo especificado. Debes cerrar el archivo después de usarlo utilizando el método Close para liberar los recursos asociados.
+
+**Lectura desde un Archivo:**
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"io/ioutil"
+)
+
+func main() {
+	archivo, err := os.Open("ejemplo.txt")
+	if err != nil {
+		fmt.Println("Error al abrir el archivo:", err)
+		return
+	}
+	defer archivo.Close()
+
+	contenido, err := ioutil.ReadAll(archivo)
+	if err != nil {
+		fmt.Println("Error al leer el archivo:", err)
+		return
+	}
+
+	fmt.Printf("Contenido del archivo: %s\n", contenido)
+}
+```
+Puedes leer el contenido del archivo utilizando el método Read o ioutil.ReadAll. El segundo ejemplo ilustra el uso de ioutil.ReadAll, que lee todo el contenido del archivo en un slice de bytes.
+
+Escritura en un Archivo:
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	archivo, err := os.Create("output.txt")
+	if err != nil {
+		fmt.Println("Error al crear el archivo:", err)
+		return
+	}
+	defer archivo.Close()
+
+	mensaje := []byte("Hola, esto es un ejemplo de escritura en un archivo.")
+	_, err = archivo.Write(mensaje)
+	if err != nil {
+		fmt.Println("Error al escribir en el archivo:", err)
+		return
+	}
+
+	fmt.Println("Datos escritos en el archivo correctamente.")
+}
+```
+Puedes crear un archivo con os.Create y luego escribir en él utilizando el método Write.
+
+**Métodos Adicionales:**
+os.File proporciona varios otros métodos además de Read y Write, como Seek para cambiar la posición del puntero de lectura/escritura, Stat para obtener información del archivo, y más. Puedes consultar la documentación oficial para obtener detalles sobre todos los métodos disponibles: [Documentación de os.File][golang-os-docs]
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	archivo, err := os.Open("ejemplo.txt")
+	if err != nil {
+		fmt.Println("Error al abrir el archivo:", err)
+		return
+	}
+	defer archivo.Close()
+
+	// Obtener información del archivo
+	info, err := archivo.Stat()
+	if err != nil {
+		fmt.Println("Error al obtener información del archivo:", err)
+		return
+	}
+
+	fmt.Printf("Nombre del archivo: %s\n", info.Name())
+	fmt.Printf("Tamaño del archivo: %d bytes\n", info.Size())
+	fmt.Printf("Última modificación: %v\n", info.ModTime())
+}
+```
+En este ejemplo, Stat se utiliza para obtener información sobre el archivo, como el nombre, tamaño y la última modificación.
+
+## Paquete bufio
+
+**bufio** es un paquete en Go que proporciona funcionalidades para realizar operaciones de entrada/salida (E/S) en búfer, lo que mejora la eficiencia al leer o escribir datos en comparación con operaciones E/S más primitivas. bufio se utiliza comúnmente para **mejorar la velocidad** y rendimiento de lectura y escritura en aplicaciones Go. 
+
+### bufio.Reader
+**bufio.Reader** se utiliza para leer datos de una fuente (por ejemplo, un archivo o una conexión de red) de manera eficiente utilizando búfer. Algunas de las funciones y métodos importantes son:
+
+**NewReader:** Crea un nuevo bufio.Reader que lee desde la fuente especificada.
+
+```go
+package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+func main() {
+    archivo, err := os.Open("ejemplo.txt")
+    if err != nil {
+        fmt.Println("Error al abrir el archivo:", err)
+        return
+    }
+    defer archivo.Close()
+
+    lector := bufio.NewReader(archivo)
+    // Ahora puedes usar 'lector' para leer desde el archivo de manera eficiente.
+}
+```
+**ReadString:** Lee y devuelve una cadena hasta que encuentra un delimitador especificado.
+
+```go
+linea, err := lector.ReadString('\n')
+if err != nil {
+    fmt.Println("Error al leer la línea:", err)
+    return
+}
+fmt.Println("Línea leída:", linea)
+```
+**ReadBytes:** Lee y devuelve un slice de bytes hasta que encuentra un delimitador especificado.
+
+```go
+bytes, err := lector.ReadBytes('\n')
+if err != nil {
+    fmt.Println("Error al leer los bytes:", err)
+    return
+}
+fmt.Println("Bytes leídos:", bytes)
+```
+### bufio.Writer
+**bufio.Writer** se utiliza para escribir datos en una salida (por ejemplo, un archivo) de manera eficiente utilizando búfer. Algunas de las funciones y métodos importantes son:
+
+**NewWriter:** Crea un nuevo bufio.Writer que escribe en la salida especificada.
+
+```go
+package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+func main() {
+    archivo, err := os.Create("salida.txt")
+    if err != nil {
+        fmt.Println("Error al crear el archivo:", err)
+        return
+    }
+    defer archivo.Close()
+
+    escritor := bufio.NewWriter(archivo)
+    // Ahora puedes usar 'escritor' para escribir en el archivo de manera eficiente.
+}
+```
+**WriteString:** Escribe una cadena en el búfer.
+
+```go
+mensaje := "Hola, mundo!\n"
+_, err := escritor.WriteString(mensaje)
+if err != nil {
+    fmt.Println("Error al escribir la cadena:", err)
+    return
+}
+```
+**Flush:** Vacía el búfer y escribe los datos en la salida subyacente.
+
+```go
+err = escritor.Flush()
+if err != nil {
+    fmt.Println("Error al vaciar el búfer:", err)
+    return
+}
+```
+### bufio.Scanner
+**bufio.Scanner** proporciona una forma conveniente de escanear (analizar) datos, como líneas en un archivo o entradas de usuario, y proporciona un ciclo simple para procesar estos datos.
+```go
+package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+func main() {
+    archivo, err := os.Open("ejemplo.txt")
+    if err != nil {
+        fmt.Println("Error al abrir el archivo:", err)
+        return
+    }
+    defer archivo.Close()
+
+    escaner := bufio.NewScanner(archivo)
+
+    for escaner.Scan() {
+        linea := escaner.Text()
+        fmt.Println("Línea escaneada:", linea)
+    }
+
+    if err := escaner.Err(); err != nil {
+        fmt.Println("Error al escanear:", err)
+    }
+}
+```
+En este ejemplo, bufio.Scanner se utiliza para escanear el contenido de un archivo línea por línea. La función Scan devuelve true mientras haya más líneas para leer. La función Text devuelve la línea actual como una cadena.
+
+[Documentación oficial][golang-bufio-docs]
+
+# Paralelismo y concurrencia gorutines
+
+
+Las gorutinas [(goroutines)][golang-goroutines-doc] son uno de los aspectos clave del modelo de concurrencia en Go. Son unidades ligeras de ejecución que permiten realizar operaciones concurrentes colaborativas de manera eficiente, el entorno de go reservca una cantidad de hilos que son gestionados por el SO y que decide que hilo puede ejecutar que gorutina en cada momento, cada rutina incorpora puntos en los que cede la ejecución a otras rutinas.
+
+## Creación de Gorutinas
+En Go, se crean gorutinas utilizando la palabra clave go seguida de una función o expresión. La función o expresión se ejecutará de manera concurrente en su propia gorutina.
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	// Crear una gorutina
+	go miFuncion()
+
+	// Otras operaciones en la gorutina principal
+	fmt.Println("Gorutina principal ejecutando otras operaciones.")
+
+	// Esperar un tiempo para permitir que la gorutina termine
+	time.Sleep(time.Second)
+}
+
+func miFuncion() {
+	fmt.Println("Esta es una gorutina.")
+}
+```
+## Comunicación entre Gorutinas
+Las gorutinas pueden comunicarse entre sí mediante canales (channels). Los canales proporcionan una forma segura y eficiente de enviar y recibir datos entre gorutinas.
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	// Crear un canal
+	canal := make(chan string)
+
+	// Lanzar una gorutina que envía datos al canal
+	go func() {
+		canal <- "Hola desde la gorutina."
+	}()
+
+	// Leer datos del canal en la gorutina principal
+	mensaje := <-canal
+	fmt.Println(mensaje)
+}
+```
+## Sincronización entre Gorutinas
+
+Es posible utilizar mecanismos de sincronización como WaitGroups para esperar a que todas las gorutinas finalicen antes de que la gorutina principal continúe.
+El paquetesync proporciona el tipo **sync.WaitGroup** que permite sincrtonizar varias gorutinas y su funcionamiento se puede resumir en dos metodos.
+- **Add(int)** incrementa un contador añadiendo una cantidad que se pasa como argumento.
+- **Done()** decrementa en uno el contador interno
+- **Wait()** bloquea la ejecución de la gorutina desde la que se invoca. La ejecución continua una vez que el contador interno llegue a cero.
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	// Crear un WaitGroup
+	var wg sync.WaitGroup
+
+	// Incrementar el contador del WaitGroup antes de lanzar la gorutina
+	wg.Add(1)
+
+	// Lanzar una gorutina
+	go func() {
+		defer wg.Done() // Decrementar el contador al finalizar la gorutina
+		fmt.Println("Esta es una gorutina.")
+	}()
+
+	// Esperar a que todas las gorutinas finalicen
+	wg.Wait()
+
+	fmt.Println("La gorutina principal continúa.")
+}
+```
+## Select y Timeout
+El uso de select permite elegir entre múltiples canales. Además, puedes usar select para implementar timeouts en operaciones de canal.
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	canal1 := make(chan string)
+	canal2 := make(chan string)
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		canal1 <- "Mensaje desde la gorutina 1"
+	}()
+
+	go func() {
+		time.Sleep(1 * time.Second)
+		canal2 <- "Mensaje desde la gorutina 2"
+	}()
+
+	select {
+	case mensaje1 := <-canal1:
+		fmt.Println(mensaje1)
+	case mensaje2 := <-canal2:
+		fmt.Println(mensaje2)
+	case <-time.After(3 * time.Second):
+		fmt.Println("Tiempo de espera agotado.")
+	}
+}
+```
+## Pools de Gorutinas y Limitación de Concurrencia
+Es posible limitar la concurrencia mediante el uso de semáforos o canales. Esto evita que se lancen demasiadas gorutinas simultáneamente, lo que puede agotar los recursos del sistema.
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 2) // Límite de 2 gorutinas simultáneas
+
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		sem <- struct{}{} // Adquirir un semáforo
+		go func(id int) {
+			defer func() {
+				<-sem // Liberar un semáforo al finalizar
+				wg.Done()
+			}()
+
+			fmt.Printf("Gorutina %d: Inicio\n", id)
+			time.Sleep(2 * time.Second)
+			fmt.Printf("Gorutina %d: Fin\n", id)
+		}(i)
+	}
+
+	wg.Wait()
+}
+```
+Estos son solo algunos ejemplos básicos de cómo trabajar con gorutinas en Go. La concurrencia y las gorutinas son aspectos poderosos de Go que permiten escribir programas concurrentes y eficientes. Sin embargo, es esencial manejar adecuadamente la sincronización y la comunicación para evitar problemas como las condiciones de carrera.
+
+
+
+```go
+```
 
 [golang-oficial-site]:https://go.dev
+[golang-os-docs]:https://pkg.go.dev/os
+[golang-bufio-docs]:https://pkg.go.dev/bufio
+[golang-goroutines-doc]:https://go.dev/tour/concurrency/1
