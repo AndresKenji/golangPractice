@@ -10,10 +10,8 @@ import (
 	"syscall"
 )
 
-var (
-	wg      sync.WaitGroup
-	sigChan = make(chan os.Signal, 1)
-)
+var wg  sync.WaitGroup
+
 
 func copyFile(src, dst string, wg *sync.WaitGroup) {
 	defer wg.Done()
@@ -80,11 +78,13 @@ func copyDirectory(src, dst string, wg *sync.WaitGroup) {
 }
 
 func main() {
-	src := "C:/Users/OscarAndresRodriguez/Documents/Notebooks"
-	dst := "C:/Users/OscarAndresRodriguez/Desktop"
+
+	sigChan := make(chan os.Signal, 1)
+	src := "F:/Kenji/Libros"
+	dst := "C:/Users/andre/Documents"
 
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
+	fmt.Println("Iniciando proceso")
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
