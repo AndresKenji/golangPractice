@@ -8,13 +8,33 @@ import (
 )
 
 type Tarea struct {
-	Id         int
 	Nombre     string
 	Detalle    string
 	Finalizado bool `default:"false"`
 }
 
-var contadorID int = 1
+type ListaTareas struct {
+	tareas []Tarea
+}
+
+func (l *ListaTareas ) agregarTarea(t Tarea){
+	l.tareas = append(l.tareas, t)
+}
+func (l *ListaTareas ) completarTarea(index int){
+	l.tareas[index].Finalizado = true
+}
+func (l *ListaTareas ) editarTarea(index int, t Tarea){
+	l.tareas[index] = t
+}
+func (l *ListaTareas ) eliminarTarea(index int){
+	l.tareas = append(l.tareas[:index],l.tareas[index+1:]...)
+}
+func (t *ListaTareas ) listarTareas(){
+	for i, tarea := range t.tareas{
+		fmt.Printf("%v) %s: %s Finalizado: %t \n",i, tarea.Nombre, tarea.Detalle, tarea.Finalizado)
+	}
+}
+
 var reader = bufio.NewReader(os.Stdin)
 func leerEntrada() string {
     entrada, _ := reader.ReadString('\n')
@@ -22,73 +42,51 @@ func leerEntrada() string {
     return entrada
 }
 
-func (t *Tarea) modificarTarea() {
-	var detalleNuevo string
-	fmt.Println("Ingresa el nuevo detalle de la tarea")
-	detalleNuevo = leerEntrada()
-	t.Detalle = detalleNuevo
-	fmt.Println("Detalle modificado")
-}
-
-func (t *Tarea) finalizar(){
-	t.Finalizado = !t.Finalizado
-	if t.Finalizado {
-		fmt.Println("Tarea finalizada!")
-	}else {
-		fmt.Println("Tarea iniciada!")
-	}
-}
-
-func agregarTarea(tareas *[]Tarea){
-	var nombre, detalle string
-	fmt.Print("Nombre:")
-	nombre = leerEntrada()
-	fmt.Print("Detalle:")
-	detalle = leerEntrada()
-	nuevaTarea := Tarea {Id:contadorID ,Nombre: nombre,Detalle: detalle} 
-	*tareas = append(*tareas, nuevaTarea)
-	contadorID ++
-}
-
-func listarTareas(tareas *[]Tarea){
-	for _, tarea := range *tareas{
-		fmt.Printf("%v) %s: %s Finalizado: %t \n",tarea.Id, tarea.Nombre, tarea.Detalle, tarea.Finalizado)
-	}
-}
-func remove(slice []Tarea, s int) []Tarea {
-    return append(slice[:s], slice[s+1:]...)
-}
 
 func main() {
-	misTareas := []Tarea{}
+	misTareas := ListaTareas{}
 	continuar := true
 
 	for continuar {
 		fmt.Print(`
-		Menu
-		Por favor elije una opción
-		1) Agregar Tarea
-		2) Lista de Tareas
-		3) Finalizar Tarea
-		4) Eliminar Tarea
-		`)
+********************************
+*Menu                          *
+*Por favor elije una opción    *
+*1) Agregar Tarea              *
+*2) Lista de Tareas            *
+*3) Finalizar Tarea            *
+*4) Eliminar Tarea             *
+*5) Salir                      *
+********************************
+>`)
 		var opcion int
 		fmt.Scanln(&opcion)
 		switch opcion {
 		case 1:
-			agregarTarea(&misTareas)
+			var t Tarea
+			fmt.Println("Agregar nueva tarea")
+			fmt.Println("===============================================")
+			fmt.Print("Nombre:")
+			t.Nombre = leerEntrada()
+			fmt.Print("Detalle:")
+			t.Detalle = leerEntrada()
+			fmt.Println("===============================================")
+			misTareas.agregarTarea(t)
 		case 2:
-			listarTareas(&misTareas)
+			misTareas.listarTareas()
 		case 3:
-			var idTarea int
-			fmt.Print("Id:")
-			fmt.Scanln(&idTarea)
-			misTareas[idTarea].finalizar()
+			var indice int
+			fmt.Print("Tarea:")
+			fmt.Scan(&indice)
+			misTareas.completarTarea(indice)			
 		case 4:
-			var idTarea int
-			fmt.Print("Id:")
-			fmt.Scanln(&idTarea)
-			misTareas = remove(misTareas, idTarea)
+			var indice int
+			fmt.Print("Tarea:")
+			fmt.Scan(&indice)
+			misTareas.eliminarTarea(indice)					
+		case 5:
+			continuar = false
+
 		}
 
 	}
