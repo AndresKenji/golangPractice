@@ -2256,6 +2256,13 @@ Estos son solo algunos ejemplos básicos de cómo trabajar con gorutinas en Go. 
 
 
 
+
+
+
+
+
+
+
 ```go
 ```
 
