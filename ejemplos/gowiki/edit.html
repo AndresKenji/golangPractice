@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar {{.Title}}</title>
+</head>
+<body>
+    <h1>Editando {{.Title}}</h1>
+    <form action="/save/{{.Title}}">
+        <div>
+            <textarea name="body" id="body" cols="50" rows="5">{{printf "%s" .Body}}</textarea>
+        </div>
+        <div>
+            <input type="submit" value="Guardar">
+        </div>
+    </form>
+    
+</body>
+</html>

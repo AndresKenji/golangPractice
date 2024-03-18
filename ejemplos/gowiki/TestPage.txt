@@ -1,0 +1,1 @@
+Esta es una prueba de escritura/lectura creada con la libreria estandar de Go
