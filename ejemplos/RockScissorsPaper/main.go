@@ -21,6 +21,7 @@ func main() {
 	router.HandleFunc("/new", handlers.NewGame)
 	router.HandleFunc("/game", handlers.Game)
 	router.HandleFunc("/about", handlers.About)
+	router.HandleFunc("/play", handlers.Play)
 	port := ":8801"
 	log.Printf("Servidor escuchando en http://localhost:%v\n",port)
 	log.Fatal(http.ListenAndServe(port,router))

@@ -20,3 +20,7 @@ header nav a {
 header nav a:hover {
     color: #1D8348;
 }
+
+.about-sec {
+    background-color: rgb(97, 97, 97);
+}

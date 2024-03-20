@@ -2,5 +2,23 @@
 
 {{define "title"}} RPS Web - Nuevo Juego {{end}}
 {{define "content"}} 
-<h1>Pagina de nuevo juego</h1>
+
+<section>
+    <div class="container">
+        <div class="row">
+            <h2 class="text-center py-4">Ingrese su nombre</h2>
+            
+            <form action="/game" method="post">
+                <div class="mb-3">
+                    <input type="text" placeholder="Ingrese su nombre" required name="name" id="name" class="form-control">
+                </div>
+                <div class="d-grip gap-2 py-4">
+                    <button type="submit" class="btn btn-success bt-lg">Empezar juego</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+
 {{end}}
