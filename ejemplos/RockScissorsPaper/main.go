@@ -12,6 +12,10 @@ import (
 func main() {
 	// Objeto router para recibir rutas
 	router := http.NewServeMux()
+	// Manejo de archivos estaticos 
+	fs := http.FileServer(http.Dir("static"))
+	// Registrar la ruta para los archivos estaticos
+	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// Agregar rutas al router
 	router.HandleFunc("/", handlers.Index)
 	router.HandleFunc("/new", handlers.NewGame)
