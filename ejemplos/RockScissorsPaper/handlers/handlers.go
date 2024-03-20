@@ -1,45 +1,44 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 )
 
 const (
-	templateDir = "./templates"
+	templateDir = "./templates/"
 	templateBase = templateDir + "base.html"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	tpl := template.Must(template.ParseFiles("templates/index.html","templates/base.html"))
-	err := tpl.ExecuteTemplate(w,"base", nil)
-	if err != nil {
-		http.Error(w, "Error al renderizar el template:", http.StatusInternalServerError)
-	}
+	renderTemplate(w,"index.html",nil)
 }
 
 func NewGame(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Crear nuevo Juego")
+	renderTemplate(w,"new-game.html",nil)
 }
 
 func Game(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Pagina de juego")
+	renderTemplate(w,"game.html",nil)
 }
 
 func Play(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "jugar")
+	renderTemplate(w,"new-game.html",nil)
 }
 
 func About(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "jugar")
+	renderTemplate(w,"about.html",nil)
 }
 
 
-func RenderTemplate(w http.ResponseWriter, base,page string, data any){
-	tpl := template.Must(template.ParseFiles(base,templateDir+page))
-	err := tpl.ExecuteTemplate(w,"base", nil)
+func renderTemplate(w http.ResponseWriter, page string, data any){
+	tpl := template.Must(template.ParseFiles(templateBase,templateDir+page))
+	
+	err := tpl.ExecuteTemplate(w,"base", data)
 	if err != nil {
 		http.Error(w, "Error al renderizar el template:", http.StatusInternalServerError)
+		log.Println(err)
+		return
 	}
 }
