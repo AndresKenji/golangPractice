@@ -1,30 +1,21 @@
 package testunitario
 
-import "testing"
+func Suma(a, b int) int {
+	return a + b
+}
 
-// func TestSuma(t *testing.T) {
-// 	total := Suma(5, 5)
-
-// 	if total != 10 {
-// 		t.Errorf("Suma incorrecta %d se esperaba %d", total, 10)
-// 	}
-// }
-
-
-func TestSuma(t *testing.T) {
-	tabla := [] struct {
-		a int
-		b int
-		c int
-	}{
-		{1,2,3},
-		{2,8,4},
-		{47,8,5},
+func GetMax(a, b int) int {
+	if a > b {
+		return a
 	}
 
-	total := Suma(5, 5)
+	return b
+}
 
-	if total != 10 {
-		t.Errorf("Suma incorrecta %d se esperaba %d", total, 10)
+func Fibonacci(n int) int {
+	if n <= 1 {
+		return n
 	}
+
+	return Fibonacci(n-1) + Fibonacci(n-2)
 }
