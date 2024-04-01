@@ -24,6 +24,7 @@ func (s *APIserver) Run() error {
 	router.HandleFunc("DELETE /users/{id}", DeleteUserHandler)
 	router.HandleFunc("GET /tasks", GetTasksHandler)
 	router.HandleFunc("GET /tasks/{id}", GetTaskHandler)
+	router.HandleFunc("PATCH /tasks/{id}", UpdateTaskHandler)
 	router.HandleFunc("POST /tasks", PostTasksHandler)
 	router.HandleFunc("DELETE /tasks/{id}", DeleteTaskHandler)
 
