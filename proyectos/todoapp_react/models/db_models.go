@@ -8,7 +8,9 @@ type User struct {
 	FirstName string `gorm:"not null" json:"first_name"`
 	LastName string `gorm:"not null" json:"last_name"`
 	Email string `gorm:"not null;unique_index" json:"email"`
+	Password string `gorm:"not null" json:"password"`
 	Tasks []Task `json:"tasks"`
+
 }
 
 type Task struct {

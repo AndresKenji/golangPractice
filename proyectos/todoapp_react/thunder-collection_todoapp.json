@@ -1,0 +1,187 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "todoapp",
+    "dateExported": "2024-04-04T22:47:54.914Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "3fd22011-3443-4c76-847a-26f90736efcf",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "get users",
+            "url": "http://localhost:8801/users",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2024-04-01T15:35:21.816Z",
+            "modified": "2024-04-01T15:35:53.086Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "8c601de4-dcda-416c-ba2b-f4648ffe09b9",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "get user by id",
+            "url": "http://localhost:8801/users/2",
+            "method": "GET",
+            "sortNum": 15000,
+            "created": "2024-04-01T15:44:10.807Z",
+            "modified": "2024-04-01T15:44:37.562Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "bf0d6b65-438b-4578-b01e-c5a314496c73",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "delete user by id",
+            "url": "http://localhost:8801/users/8",
+            "method": "DELETE",
+            "sortNum": 17500,
+            "created": "2024-04-01T15:45:04.920Z",
+            "modified": "2024-04-01T15:45:37.821Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "3c28d3a0-afc6-4b7b-acf7-622230834b94",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "new user",
+            "url": "http://localhost:8801/users",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-04-01T15:36:18.065Z",
+            "modified": "2024-04-04T22:00:33.807Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"first_name\":\"Aslhey\",\n  \"last_name\":\"Ramirez\",\n  \"email\":\"aramirez@mail.com\",\n  \"password\":\"880106Luanda\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "3ad5984c-3e48-4fdd-8a4d-d73110645a38",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "get tasks",
+            "url": "http://localhost:8801/tasks",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-04-01T18:47:34.097Z",
+            "modified": "2024-04-01T18:47:50.325Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "b930bd85-9caf-46c9-99e3-2108b08baab4",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "new task",
+            "url": "http://localhost:8801/tasks",
+            "method": "POST",
+            "sortNum": 25000,
+            "created": "2024-04-01T18:49:12.208Z",
+            "modified": "2024-04-01T18:52:34.221Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n \"title\":\"test 7\",\n \"description\":\"this is a another test todo\",\n \"user_id\":7\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "9cb895f5-6c1b-435d-ac24-176456887311",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "edit task",
+            "url": "http://localhost:8801/tasks/1",
+            "method": "PATCH",
+            "sortNum": 27500,
+            "created": "2024-04-01T19:16:29.874Z",
+            "modified": "2024-04-01T19:49:31.780Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n \"title\":\"tarea numero 1\",\n \"description\":\"modificada\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "db333eb0-c4bb-4ec7-8198-336e7c3784e9",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "get task by id",
+            "url": "http://localhost:8801/tasks/1",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-04-01T18:47:55.616Z",
+            "modified": "2024-04-01T18:48:30.241Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "0f18b2f8-8a7c-40ca-b60e-c5ab8fe0ca3a",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "delete task",
+            "url": "http://localhost:8801/tasks/1",
+            "method": "DELETE",
+            "sortNum": 40000,
+            "created": "2024-04-01T18:48:41.655Z",
+            "modified": "2024-04-01T18:49:04.840Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "d1dfe35c-6d99-402d-8e9b-71f4d43656e7",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "login",
+            "url": "http://localhost:8801/login",
+            "method": "POST",
+            "sortNum": 50000,
+            "created": "2024-04-04T22:34:39.708Z",
+            "modified": "2024-04-04T22:38:05.073Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"orodriguez@mail.com\",\n  \"password\":\"880106Luanda\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "0e3f5842-5c26-4b83-a0b6-cfcb6f6381df",
+            "colId": "87cfd824-3b06-4256-a39c-488406e06c71",
+            "containerId": "",
+            "name": "protected",
+            "url": "http://localhost:8801/protected",
+            "method": "GET",
+            "sortNum": 60000,
+            "created": "2024-04-04T22:35:10.430Z",
+            "modified": "2024-04-04T22:38:14.711Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im9yb2RyaWd1ZXpAbWFpbC5jb20iLCJleHAiOjE3MTIzNTY2ODV9.ziu-xZ9Pizm1UQvPRzoCIfvGPCHa208MbrST7VEdX7Q"
+            },
+            "tests": []
+        }
+    ]
+}

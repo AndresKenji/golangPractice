@@ -1,8 +1,10 @@
 package api
 
 import (
+
 	"log"
 	"net/http"
+
 )
 
 type APIserver struct {
@@ -18,6 +20,7 @@ func (s *APIserver) Run() error {
 	router := http.NewServeMux()
 	// al agregar un handlefunc a un router estamos especificando el Metodo servidor/ruta y la función a ejecutar
 	router.HandleFunc("GET /", index)
+	router.HandleFunc("GET /protected", ProtectedHandler)
 	router.HandleFunc("GET /users", GetUsersHandler)
 	router.HandleFunc("GET /users/{id}", GetUserHandler)
 	router.HandleFunc("POST /users",PostUserHandler)
@@ -27,6 +30,7 @@ func (s *APIserver) Run() error {
 	router.HandleFunc("PATCH /tasks/{id}", UpdateTaskHandler)
 	router.HandleFunc("POST /tasks", PostTasksHandler)
 	router.HandleFunc("DELETE /tasks/{id}", DeleteTaskHandler)
+	router.HandleFunc("POST /login",LoginHandler)
 
 	// listado de middlewares
 	middlewareChain := MiddlewareChain(
@@ -56,8 +60,8 @@ func MiddlewareChain(middlewares ...Middleware) Middleware {
 		return next.ServeHTTP
 	}
 }
-
-
+// openssl rand -hex 32
+// e1e88324dadf0f46aac25f42de2a2278f67f854878552425d456995e1b17fcec
 // RequestLoggerMiddleware es un middleware que toma como argumento un handler http y ejecuta una logica previa a la ejecución del handler, en este caso imprime el metodo y la ruta solicitada
 func RequestLoggerMiddleware(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
