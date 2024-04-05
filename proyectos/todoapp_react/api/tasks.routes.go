@@ -2,23 +2,35 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
+	"strconv"
 	"todoapp/db"
 	"todoapp/models"
 )
 
-
-func GetTasksHandler(w http.ResponseWriter, r *http.Request ){
+func GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 	var tasks []models.Task
-	db.DB.Find(&tasks)
+	userid, err := GetCookieUSer(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte(err.Error()))
+	}
+	db.DB.Where("user_id = ?", userid).Find(&tasks)
 	json.NewEncoder(w).Encode(&tasks)
 }
 
-func GetTaskHandler(w http.ResponseWriter, r *http.Request ){
+func GetTaskHandler(w http.ResponseWriter, r *http.Request) {
+	userid, err := GetCookieUSer(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte(err.Error()))
+	}
 	var task models.Task
 	id := r.PathValue("id")
-	db.DB.First(&task,id)
-	if task.ID == 0 {
+	db.DB.First(&task, id)
+	if task.ID == 0 || task.UserId != uint(userid) {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("Task not found"))
 		return
@@ -26,10 +38,10 @@ func GetTaskHandler(w http.ResponseWriter, r *http.Request ){
 	json.NewEncoder(w).Encode(&task)
 }
 
-func ChangeTaskStateHandler(w http.ResponseWriter, r *http.Request ){
+func ChangeTaskStateHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	id := r.PathValue("id")
-	db.DB.First(&task,id)
+	db.DB.First(&task, id)
 	if task.ID == 0 {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("Task not found"))
@@ -40,38 +52,36 @@ func ChangeTaskStateHandler(w http.ResponseWriter, r *http.Request ){
 	json.NewEncoder(w).Encode(&task)
 }
 
-func UpdateTaskHandler(w http.ResponseWriter, r *http.Request ){
+func UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	id := r.PathValue("id")
-	db.DB.First(&task,id)
+	db.DB.First(&task, id)
 	if task.ID == 0 {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("Task not found"))
 		return
 	}
-	
-	// Crear un decodificador para leer el cuerpo del request
-    decoder := json.NewDecoder(r.Body)
 
-    // Definir una estructura o variable para almacenar los datos del cuerpo del request
-    var datos models.Task 
-    // Decodificar el cuerpo del request en la estructura o variable definida
-    err := decoder.Decode(&datos)
-    if err != nil {
-        // Manejar el error si ocurre al decodificar el cuerpo del request
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Error al decodificar el cuerpo del request"))
-        return
-    }
+	// Crear un decodificador para leer el cuerpo del request
+	decoder := json.NewDecoder(r.Body)
+
+	// Definir una estructura o variable para almacenar los datos del cuerpo del request
+	var datos models.Task
+	// Decodificar el cuerpo del request en la estructura o variable definida
+	err := decoder.Decode(&datos)
+	if err != nil {
+		// Manejar el error si ocurre al decodificar el cuerpo del request
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error al decodificar el cuerpo del request"))
+		return
+	}
 	task.Description = datos.Description
 	task.Title = datos.Title
 	db.DB.Save(&task)
-    json.NewEncoder(w).Encode(&task)
+	json.NewEncoder(w).Encode(&task)
 }
 
-
-
-func PostTasksHandler(w http.ResponseWriter, r *http.Request ){
+func PostTasksHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	json.NewDecoder(r.Body).Decode(&task)
 	createdTask := db.DB.Create(&task)
@@ -80,16 +90,16 @@ func PostTasksHandler(w http.ResponseWriter, r *http.Request ){
 		w.WriteHeader(http.StatusBadRequest) // 400
 		w.Write([]byte(err.Error()))
 		return
-	} 
+	}
 
 	json.NewEncoder(w).Encode(&task)
-	
+
 }
 
-func DeleteTaskHandler(w http.ResponseWriter, r *http.Request ){
+func DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	id := r.PathValue("id")
-	db.DB.First(&task,id)
+	db.DB.First(&task, id)
 	if task.ID == 0 {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("Task not found"))
@@ -97,4 +107,24 @@ func DeleteTaskHandler(w http.ResponseWriter, r *http.Request ){
 	}
 	db.DB.Unscoped().Delete(&task)
 	w.WriteHeader(http.StatusNoContent) // 404
+}
+
+func GetCookieUSer(r *http.Request) (int, error) {
+	cookie, err := r.Cookie("userid")
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			return 0, errors.New("cookie not found")
+
+		default:
+			log.Println(err)
+			return 0, errors.New("server error")
+		}
+	}
+	id, err := strconv.Atoi(cookie.Value)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
