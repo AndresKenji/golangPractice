@@ -3,9 +3,11 @@ package api
 // go get -u golang.org/x/crypto/...
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 	"todoapp/db"
 	"todoapp/models"
@@ -87,7 +89,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		cookie := http.Cookie{
 			Name:   "userid",
-			Value:  string(user.ID),
+			Value:  strconv.Itoa(int(user.ID)),
 			Path:   "/",
 			MaxAge: 1800, // segundos
 			Secure: true,
@@ -150,4 +152,27 @@ func verifyPassword(hashed string, plainPassword []byte) bool {
 		return false
 	}
 	return true
+}
+
+func GetCookieUSer(r *http.Request) (int, error) {
+	cookie, err := r.Cookie("userid")
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			log.Println(err)
+			return 0, errors.New("cookie not found")
+
+		default:
+			log.Println(err)
+			return 0, errors.New("server error")
+		}
+	}
+	id, err := strconv.Atoi(cookie.Value)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	fmt.Println("cookie readed value: ", cookie.Value)
+
+	return id, nil
 }

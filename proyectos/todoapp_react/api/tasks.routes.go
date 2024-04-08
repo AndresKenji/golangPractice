@@ -2,10 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
-	"strconv"
 	"todoapp/db"
 	"todoapp/models"
 )
@@ -82,10 +80,17 @@ func UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostTasksHandler(w http.ResponseWriter, r *http.Request) {
+	userid, err := GetCookieUSer(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte(err.Error()))
+	}
+	log.Println("User Id: ", userid)
 	var task models.Task
 	json.NewDecoder(r.Body).Decode(&task)
+	task.UserId = uint(userid)
 	createdTask := db.DB.Create(&task)
-	err := createdTask.Error
+	err = createdTask.Error
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest) // 400
 		w.Write([]byte(err.Error()))
@@ -107,24 +112,4 @@ func DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	db.DB.Unscoped().Delete(&task)
 	w.WriteHeader(http.StatusNoContent) // 404
-}
-
-func GetCookieUSer(r *http.Request) (int, error) {
-	cookie, err := r.Cookie("userid")
-	if err != nil {
-		switch {
-		case errors.Is(err, http.ErrNoCookie):
-			return 0, errors.New("cookie not found")
-
-		default:
-			log.Println(err)
-			return 0, errors.New("server error")
-		}
-	}
-	id, err := strconv.Atoi(cookie.Value)
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
 }
