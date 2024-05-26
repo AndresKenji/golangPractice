@@ -19,12 +19,12 @@ func Schedule(date string) time.Time {
 func HasPassed(date string) bool {
 	haspassed := time.Now().Compare(Schedule(date)) 
 	if haspassed > 0 {
-		return true
+		return false
 	}
 	if haspassed < 0 {
 		return false
 	}
-	return false
+	return true
 }
 
 // IsAfternoonAppointment returns whether a time is in the afternoon.
@@ -48,4 +48,6 @@ func main() {
     appointmentTime := Schedule(appointmentDate)
     fmt.Println("Appointment time:", appointmentTime.Format("2006-01-02 15:04"))
 	fmt.Println(HasPassed("October 3, 2019 20:32:00"))
+
+	fmt.Println("validando si la fecha es futura",HasPassed("7/13/2020 20:32:00"))
 }
