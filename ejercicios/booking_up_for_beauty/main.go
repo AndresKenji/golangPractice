@@ -17,8 +17,12 @@ func Schedule(date string) time.Time {
 
 // HasPassed returns whether a date has passed.
 func HasPassed(date string) bool {
-	if time.Now().After(Schedule(date)) {
+	haspassed := time.Now().Compare(Schedule(date)) 
+	if haspassed > 0 {
 		return true
+	}
+	if haspassed < 0 {
+		return false
 	}
 	return false
 }
@@ -43,4 +47,5 @@ func main() {
     appointmentDate := "7/13/2020 20:32:00"
     appointmentTime := Schedule(appointmentDate)
     fmt.Println("Appointment time:", appointmentTime.Format("2006-01-02 15:04"))
+	fmt.Println(HasPassed("October 3, 2019 20:32:00"))
 }
