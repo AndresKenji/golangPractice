@@ -2095,96 +2095,42 @@ En este ejemplo, bufio.Scanner se utiliza para escanear el contenido de un archi
 # Paralelismo y concurrencia gorutines
 
 
-Las gorutinas [(goroutines)][golang-goroutines-doc] son uno de los aspectos clave del modelo de concurrencia en Go. Son unidades ligeras de ejecución que permiten realizar operaciones concurrentes colaborativas de manera eficiente, el entorno de go reservca una cantidad de hilos que son gestionados por el SO y que decide que hilo puede ejecutar que gorutina en cada momento, cada rutina incorpora puntos en los que cede la ejecución a otras rutinas.
+El paralelismo y la concurrencia son conceptos relacionados pero distintos en la programación, especialmente cuando se trata de manejar tareas simultáneas. 
 
-## Creación de Gorutinas
-En Go, se crean gorutinas utilizando la palabra clave go seguida de una función o expresión. La función o expresión se ejecutará de manera concurrente en su propia gorutina.
+En los inicios de la programación la manera mas eficiente de solucionar un problema de gran tamaño era dividirlo en subproblemas que se ejecutaban de manera paralela en diferentes computadoras, con la evolución del hardware se crearon procesadores de varios nucleos por lo que la computación evoluciono para dar solución a varios procesos al mismo tiempo, sin embargo, el sofware aun continuaba ejecutando todo de manera secuencial.
 
-```go
-package main
+Antes de que los procesadores con multiples nucleos aparecieran, los sistemas operativos implementaban tareas en paralelo ejecutando otra tarea mientras esperaba el resultado de la anterior a esto se le conoce como **asincronía** o [concurrencia](#concurrencia) y se hacia de manera tal que no bloqueara la tarea principal.
 
-import (
-	"fmt"
-	"time"
-)
+Al aparecer los procesadores con multiples nucleos se pudo aprovechar la capacidad de ejecutar tareas de manera [paralela](#paralelismo) y asi dividir los calculos entre diferentes programas que se ejecutaban al tiempo, sin embargo, estos procesos no estan aislados totalmente ya que deben compartir datos y señales de sincronización, para dar manejo a esto se puede dividir un proceso en multiples **hilos**.
 
-func main() {
-	// Crear una gorutina
-	go miFuncion()
+Un hilo es más liviano que un proceso y cada hilo que surge de un proceso comparte la misma memoría, por lo cual es mas sencillo compartir datos y comunicarse entre ellos. Sin embargo, con el crecimiento de internet y de los distintos tipos de aplicaciones que se sirven en los servidotes se presenta un alto flujo de peticiones y esto a su vez genera una gran cantidad de procesos en paralelo y el sistema de hilos se vuelve insuficiente.
 
-	// Otras operaciones en la gorutina principal
-	fmt.Println("Gorutina principal ejecutando otras operaciones.")
+Ya que cada hilo es gestionado por el sistema operativo y este necesita guardar una cantidad de datos relativamente alta para mantener el estado de cada hilo esto es conocido como la [pila de ejecución][pila-de-ejecucion], cada vez que el sistema operativo tiene que liberar la ejecución de un hilo y ceder los recursos a otro en espera el cambio de **contexto** se vuelve costoso ya que se tiene que guardar las pilas de ejecución y los registros del procesador.
 
-	// Esperar un tiempo para permitir que la gorutina termine
-	time.Sleep(time.Second)
-}
+## Concurrencia
 
-func miFuncion() {
-	fmt.Println("Esta es una gorutina.")
-}
-```
-## Comunicación entre Gorutinas
-Las gorutinas pueden comunicarse entre sí mediante canales (channels). Los canales proporcionan una forma segura y eficiente de enviar y recibir datos entre gorutinas.
+La concurrencia se refiere a la capacidad de un sistema para gestionar múltiples tareas aparentemente al mismo tiempo. Sin embargo, esto no necesariamente significa que estas tareas se estén ejecutando simultáneamente. En un sistema concurrente, varias tareas progresan sin importar si son realmente ejecutadas al mismo tiempo o si se alternan rápidamente entre ellas.
 
-```go
-package main
+- **Ejemplo de concurrencia en la vida real:** Imagina un chef en una cocina que está preparando varios platos a la vez. El chef corta verduras, luego se mueve a la estufa para revolver una olla, y luego va al horno a revisar un asado. 
 
-import (
-	"fmt"
-	"time"
-)
+Aunque el chef no está haciendo todas estas acciones simultáneamente, está manejando todas estas tareas concurrentemente.
 
-func main() {
-	// Crear un canal
-	canal := make(chan string)
 
-	// Lanzar una gorutina que envía datos al canal
-	go func() {
-		canal <- "Hola desde la gorutina."
-	}()
+## Paralelismo
 
-	// Leer datos del canal en la gorutina principal
-	mensaje := <-canal
-	fmt.Println(mensaje)
-}
-```
-## Sincronización entre Gorutinas
+El paralelismo es un tipo específico de concurrencia donde múltiples tareas se ejecutan realmente al mismo tiempo. Esto solo es posible en sistemas con múltiples núcleos de CPU o múltiples CPU.
 
-Es posible utilizar mecanismos de sincronización como WaitGroups para esperar a que todas las gorutinas finalicen antes de que la gorutina principal continúe.
-El paquetesync proporciona el tipo **sync.WaitGroup** que permite sincrtonizar varias gorutinas y su funcionamiento se puede resumir en dos metodos.
-- **Add(int)** incrementa un contador añadiendo una cantidad que se pasa como argumento.
-- **Done()** decrementa en uno el contador interno
-- **Wait()** bloquea la ejecución de la gorutina desde la que se invoca. La ejecución continua una vez que el contador interno llegue a cero.
+- **Ejemplo de paralelismo en la vida real:** Imagina dos chefs en la cocina, cada uno preparando un plato diferente al mismo tiempo. Uno está cortando verduras mientras el otro está revolviendo una olla simultáneamente.
 
-```go
-package main
+- **En programación:** El paralelismo se logra ejecutando múltiples hilos, procesos o goroutines en diferentes núcleos de CPU de manera que se ejecuten en paralelo.
 
-import (
-	"fmt"
-	"sync"
-)
 
-func main() {
-	// Crear un WaitGroup
-	var wg sync.WaitGroup
+## Concurrencia vs Paralelismo
 
-	// Incrementar el contador del WaitGroup antes de lanzar la gorutina
-	wg.Add(1)
+- **Concurrencia:** Se trata de gestionar múltiples tareas a la vez. No implica que las tareas se ejecuten simultáneamente, sino que se manejan de manera que parecen progresar al mismo tiempo.
 
-	// Lanzar una gorutina
-	go func() {
-		defer wg.Done() // Decrementar el contador al finalizar la gorutina
-		fmt.Println("Esta es una gorutina.")
-	}()
+- **Paralelismo:** Se trata de ejecutar múltiples tareas realmente al mismo tiempo, utilizando múltiples núcleos de CPU.
 
-	// Esperar a que todas las gorutinas finalicen
-	wg.Wait()
-
-	fmt.Println("La gorutina principal continúa.")
-}
-```
-## Select y Timeout
-El uso de select permite elegir entre múltiples canales. Además, puedes usar select para implementar timeouts en operaciones de canal.
 
 ```go
 package main
@@ -2194,65 +2140,326 @@ import (
 	"time"
 )
 
-func main() {
-	canal1 := make(chan string)
-	canal2 := make(chan string)
-
-	go func() {
-		time.Sleep(2 * time.Second)
-		canal1 <- "Mensaje desde la gorutina 1"
-	}()
-
-	go func() {
-		time.Sleep(1 * time.Second)
-		canal2 <- "Mensaje desde la gorutina 2"
-	}()
-
-	select {
-	case mensaje1 := <-canal1:
-		fmt.Println(mensaje1)
-	case mensaje2 := <-canal2:
-		fmt.Println(mensaje2)
-	case <-time.After(3 * time.Second):
-		fmt.Println("Tiempo de espera agotado.")
-	}
-}
-```
-## Pools de Gorutinas y Limitación de Concurrencia
-Es posible limitar la concurrencia mediante el uso de semáforos o canales. Esto evita que se lancen demasiadas gorutinas simultáneamente, lo que puede agotar los recursos del sistema.
-
-```go
-package main
-
-import (
-	"fmt"
-	"sync"
-	"time"
-)
-
-func main() {
-	var wg sync.WaitGroup
-	sem := make(chan struct{}, 2) // Límite de 2 gorutinas simultáneas
-
+// función para simular una tarea
+func task(name string) {
 	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		sem <- struct{}{} // Adquirir un semáforo
-		go func(id int) {
-			defer func() {
-				<-sem // Liberar un semáforo al finalizar
-				wg.Done()
-			}()
-
-			fmt.Printf("Gorutina %d: Inicio\n", id)
-			time.Sleep(2 * time.Second)
-			fmt.Printf("Gorutina %d: Fin\n", id)
-		}(i)
+		fmt.Printf("%s: %d\n", name, i)
+		time.Sleep(time.Millisecond * 500)
 	}
+}
 
-	wg.Wait()
+func main() {
+	go task("Task 1") // lanzamos una goroutine para task 1
+	go task("Task 2") // lanzamos otra goroutine para task 2
+
+	// esperamos para que las goroutines terminen
+	time.Sleep(time.Second * 3)
+	fmt.Println("Finished")
 }
 ```
-Estos son solo algunos ejemplos básicos de cómo trabajar con gorutinas en Go. La concurrencia y las gorutinas son aspectos poderosos de Go que permiten escribir programas concurrentes y eficientes. Sin embargo, es esencial manejar adecuadamente la sincronización y la comunicación para evitar problemas como las condiciones de carrera.
+En este ejemplo, task("Task 1") y task("Task 2") se ejecutan concurrentemente. Aunque solo hay un hilo de ejecución, Go maneja el cambio de contexto entre estas goroutines, lo que da la impresión de que se están ejecutando al mismo tiempo.
+
+- Ejemplo de paralelismo
+
+El paralelismo se observa más claramente en sistemas con múltiples núcleos de CPU. En Go, el paralelismo se puede controlar usando el paquete runtime para establecer el número de CPU que deben utilizarse:
+
+```go
+package main
+
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
+
+func task(name string) {
+	for i := 0; i < 5; i++ {
+		fmt.Printf("%s: %d\n", name, i)
+		time.Sleep(time.Millisecond * 500)
+	}
+}
+
+func main() {
+	// establecer el número de CPU que se utilizarán
+	runtime.GOMAXPROCS(2)
+
+	go task("Task 1")
+	go task("Task 2")
+
+	time.Sleep(time.Second * 3)
+	fmt.Println("Finished")
+}
+```
+En este ejemplo, runtime.GOMAXPROCS(2) permite que las goroutines se ejecuten en paralelo en dos núcleos de CPU, si están disponibles. Esto no solo permite la concurrencia, sino que también aprovecha el paralelismo del hardware.
+
+## Gorutines
+
+Go reserva una cantidad de nucleos con los cuales se pueden ejecutar tareas de manera paralela de manera colaborativa conocidas como gorrutinas, Go decide que hilos ejecutan cada gorrutina en cada momento, cada gorrutina incluye puntos en los que voluntariamente cede la ejecución a otras gorrutinas
+
+![ejecución de gorrutinas](./readme_imgs/gorutines-lvl.png)
+
+Las gorrutinas presentan una ventaja sobre otras formas de ejecución paralela, ya que la unica tarea que recae sobre el desarrollador es la de ejecutar una funcion en paralelo dentro de una gorrutina mediante la orden `go`.
+
+```go
+go nombreFuncion() 
+go variable.nombreMetodo()
+go func(){
+    // Logica a ejecutar
+}()
+```
+Cualquier ejecución o metodo que se realize con la orden `go` sera ejecutada en paralelo en su propia gorrutina, ejemplo:
+
+```go
+func cincoVeces(msg string){
+    for i := 1; i<= 5; i++ {
+        fmt.Printf("(%d de 5) %s\n",i,msg)
+    }
+}
+
+func main() {
+    fmt.Println("Iniciando gorrutina")
+
+    go cincoVeces("Esta gorrutina no siempre se completará")
+
+    cincoVeces("Este mensaje se mostrara cinco veces")
+
+    fmt.Println("Finalizando gorrutina")
+}
+```
+La función cincoVeces se invoca de dos maneras en esta ejecución, la primera se lanza sobre su propia gorrutina con la orden `go` y la segunda se hace desde la gorrutina principal, el resultado de esta puede variar, puede comprobarlo verificando el apartado [ejemplo1](./ejemplos/ejemplo1/main.go) ejecutando el comando `go run main.go`
+
+Es posible que no se muestre ningun mensaje de la gorrutina ya que al finalizar la gorrutina principal se finalizan todas las demas, esto es debido a que go no garantiza el orden ni el momento de finalización de una gorrutina.
+
+## Sincronización sync.WaitGroup
+
+En la libreria standar de go se incluye el paquete [sync.WaitGroup][waitGroups] el cual permite sincronizar varias gorrutinas a través de un grupo de espera (WaitGroup), sus funciones principales son:
+
+- **Add(int)**: agrega un contador a la espera.
+- **Done()**: decrementa un contador al WaitGroup
+- **Wait()**: bloquea la ejecución de la gorrutina desde la que se llama, la ejecución se desbloquea una vez que el contador llegue a cero
+
+Gracias al waitGroup se crea una colección de gorrutinas las cuales deben completar su ejecución antes de continuar con el proceso.
+
+```go
+const numTareas = 3
+
+wg := sync.WaitGroup{}
+wg.Add(numTareas)
+
+for i := 0 ; i < numTareas; i++ {
+    numTarea := i
+    go func(){
+        defer wg.Done()
+        fmt.Println("Ejecutando tarea", numTarea)
+    }()
+}
+
+wg.wait()
+
+fmt.Println("Completadas todas las tareas. Finalizado")
+```
+
+Puede verificar la salida de esta función [aca](./ejemplos/goroutines/ejemplo2/main.go) con el comando `go run main.go`.
+
+## Condiciones de carrera
+
+El paralelismo facilita las operaciones, sin embargo, ya que las gorrutinas comparten espacios de memoria pueden generarse problemas al acceder a una variable antes de tiempo es decir antes de que el resultado sea procesado por otra gorrutina, a esto se le conoce como condición de carrera ya que de alguna manera la gorrutina que tome primero la variable podria introducir en ella o modificar el valor antes que otra.
+
+Para tener una explicación mas clara miremos el siguiente ejemplo:
+```go
+package main
+
+import (
+	"fmt"
+	"runtime"
+	"sync"
+)
+
+func main() {
+	tareasParalelas := runtime.GOMAXPROCS(0)
+
+	v := []int{0,1,3,1,0,7,8,9,3,3,0,2}
+	wg := sync.WaitGroup{}
+	wg.Add(tareasParalelas)
+	totalSuma := 0
+
+	for t := 0; t < tareasParalelas; t++{
+		s := t
+		go func(){
+			defer wg.Done()
+			inicio := s * len(v )/ tareasParalelas
+			fin := (s + 1) * len(v )/ tareasParalelas
+			suma := Suma(v[inicio:fin])
+			totalSuma += suma
+		}()
+	}
+	wg.Wait()
+	if totalSuma != 37{
+		panic(fmt.Sprint("totalSuma: ",totalSuma))
+	}
+}
+
+
+func Suma(porcion []int) int {
+	total := 0
+	for _, n := range porcion{
+		total += n
+	}
+	return total
+}
+```
+Este codigo es simple y la mayoria de las veces podria no fallar, sin embargo, si lo analizamos detenidamente podemos observar que se genera una condición de carrera sobre la variable totalSuma
+
+- Operación 1: Buscar el valor de totalSuma y guardarlo en un registro reg :=  totalSuma
+- Operación 2: Añade el valor de suma al registro: reg += suma
+- Operación 3: Guarda el valor resultante en la variable original totalSuma = reg
+
+
+## Sincronización mediante sync.Mutex
+
+El typo sync.Mutex es una abreviación para mutual exclusion y permite definir partes del codigo que solo se ejecutaran desde una gorutina a la vez, este tipo proporciona los siguientes métodos:
+- **Lock()**: Adquiere la exclusividad de la ejecución del código a partir de dicha invocación, si alguna otra gorrutina ha ejecutado el Lock() primero entonces espera hasta que se libere el mutex
+- **Unlock()**: Libera la exclusividad de ejecución en la gorrutina.
+cualquier parte de codigo que invoque el Lock debe obligatoriamente invocar el Unlock para evitar bloqueos en las demas gorrutinas, tomando como ejemplo el codigo anterior se puede modificar para usar el Mutex de la siguiente manera
+
+```go
+package main
+
+import (
+	"fmt"
+	"runtime"
+	"sync"
+)
+
+func main() {
+	tareasParalelas := runtime.GOMAXPROCS(0)
+
+	v := []int{0,1,3,1,0,7,8,9,3,3,0,2}
+	mt := sync.Mutex{}
+	wg := sync.WaitGroup{}
+	wg.Add(tareasParalelas)
+	totalSuma := 0
+
+	for t := 0; t < tareasParalelas; t++{
+		s := t
+		go func(){
+			defer wg.Done()
+			inicio := s * len(v )/ tareasParalelas
+			fin := (s + 1) * len(v )/ tareasParalelas
+			suma := Suma(v[inicio:fin])
+			mt.Lock()
+			totalSuma += suma
+			mt.Unlock()
+		}()
+	}
+	wg.Wait()
+	if totalSuma != 37{
+		panic(fmt.Sprint("totalSuma: ",totalSuma))
+	}
+}
+
+
+func Suma(porcion []int) int {
+	total := 0
+	for _, n := range porcion{
+		total += n
+	}
+	return total
+}
+```
+
+# Canales
+
+Un [canal][channels] es un tipo de variable que permite la comunicación o compartir un tipo de dato entre gorrutinas.
+
+```go
+var nombres chan string
+```
+**nombres** es un canal que permite compartir datos del tipo string, los canales son tatados por referencia.
+
+Un canal se crea mediante la orden make:
+```go
+nombres := make(chan string)
+```
+El operador `<-` permite leer o escribir datos, según si se sitúa a la izquierda o la derecha. 
+
+Para enviar datos a un canal
+```go
+nombres <- "Oscar Andres"
+```
+Para recibir un dato de un canal y guardarlo en una variable, nueva o existente
+
+```go
+variable := <- nombres
+// o 
+variable = <- nombres
+```
+Cuando los canales se usan de manera temporal, puede ser necesario cerrarlos para libera recursos mediante la orden close:
+
+```go
+close(nombres)
+```
+El comportamiento de los canales esta definido por las siguientes reglas:
+- Los datos se reciben en el mismo orden que se envian
+- Cuando un dato se envía, se recibirá una y solo una vez. Aunque multiples gorrutinas estén leyendo el mismo canal, solo una recibira el dato enviado.
+- Cuando una gorrutina intenta recibir un dato de un canal vacío (sin datos pendientes de recepción), la ejecución se bloquea hata que recibe algun dato.
+- Cuando una gorrutina intenta recibir un dato de un canal vacío que ha sido cerrado, se recibe el valor de cero del tipo asociado al canal y la ejecución continua sin bloquearse.
+- Cuando una gorrutina intenta escribir en un canal previamente cerrado el programa entra en panico.
+
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	ch := make(chan string)
+	go func() {
+		ch <- "hola mundo enviado a un canal"
+	}()
+	recibido := <-ch
+	fmt.Println("Se ha recibido:",recibido)
+}
+```
+- El ejemplo anterior muesta un uso basico de un canal el cual recibe un mensaja desde una gorrutina, la gorrutina principal bloquea su ejecución hasta que reciba un mensaje por el canal.
+
+## Canales de lectura y de escritura
+
+Se puede limitar el uso de un canal para que sea solo de lectura o escritura como se muestra en el siguiente ejemplo:
+
+```go
+package main
+
+import "fmt"
+
+const nums = 3
+
+func Emisor(ch chan<- int) {
+	for i := 1; i <= nums; i++ {
+		ch <- i
+		fmt.Println(i, "Enviado correctamente")
+	}
+}
+
+func Recerptor(ch <-chan int) {
+	for i := 1; i <= nums; i++ {
+		num := <-ch
+		fmt.Println("Recibido:",num)
+	}
+}
+
+func main() {
+	ch := make(chan int)
+
+	go Emisor(ch)
+	Recerptor(ch)
+}
+```
+
+
+
+
+
 
 
 
@@ -2271,3 +2478,6 @@ Estos son solo algunos ejemplos básicos de cómo trabajar con gorutinas en Go. 
 [golang-bufio-docs]:https://pkg.go.dev/bufio
 [golang-goroutines-doc]:https://go.dev/tour/concurrency/1
 [gobyexample]:https://gobyexample.com/
+[pila-de-ejecucion]:https://es.wikipedia.org/wiki/Pila_de_llamadas
+[waitGroups]:https://gobyexample.com/waitgroups
+[channels]:https://steemit.com/cervantes/@orlmicron/channels-en-go-golang
