@@ -2456,14 +2456,531 @@ func main() {
 }
 ```
 
+## Multiples receptores
+
+Un canal puede recibir datos de multiples gorrutinas y multiples gorrutinas pueden consultar datos de un mismo canal sin olvidar lo siguiente.
+
+- Solo una gorrutina puede tomar el dato, si hay multiples esperando entonces continuaran esperando hasta que se envie otro.
+- Cuando se envian multiples datos no se hace una repartición ecuanime entre las demas.
+
+tome como ejemplo el siguiente [codigo](./ejemplos/channels/3-multipleReceptor.go) 
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+
+	dulces := make(chan string, 10)
+
+	go Engullidor("kenji", dulces)
+	go Engullidor("shizu", dulces)
+	go Engullidor("chibi", dulces)
+
+	dulces <- "Donnut"
+	time.Sleep(time.Second)
+	dulces <- "Galleta"
+	time.Sleep(time.Second)
+	dulces <- "Brownie"
+	time.Sleep(time.Second)
 
 
 
+}
+func Engullidor(nombre string, dulces <-chan string) {
+	for dulce := range dulces {
+		fmt.Println(nombre,"come",dulce)
+	}
+}
+```
+
+Es posible que al ejecutar el codigo no todas las gorrutinas obtengan un valor desde el canal dulces, es posible que el resultado sea el siguiente:
+
+```text
+kenji come Donnut
+shizu come Galleta
+kenji come Brownie
+```
+
+## Sincronización entre canales
+
+Debido a que una gorrutina puede bloquear su ejecución utilizando un canal, es posible utilizarlo para realizar sincronización de las mismas como se muestra en el siguiente codigo
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	espera := TareaSincrona()
+
+	<- espera
+
+	fmt.Println("Programa finalizado")
+
+}
+
+func TareaSincrona() <-chan struct{} {
+	ch := make(chan struct{})
+	go func ()  {
+		fmt.Println("Haciendo alguna cosa en paralelo...")
+		for i := 0; i < 3; i++ {
+			fmt.Println(i,"...")
+		}
+		fmt.Println("finalizada tarea en paralelo")
+	
+		close(ch)
+		
+	}()
+	return ch
+
+}
+```
+la función tarea sincrona retorna un canal sin relevancia ya que no contiene ningun dato, sin embargo, ya que en el el main se esta esperando que ese canal retorne algo o sea cerrado su ejecución se va a pausar hasta que la otra gorrutina concluya.
+
+## Multiplexión con select
+
+Una gorrutina puede leer datos de mas de un canal y realizar distintas acciones segun el dato recibido.
+
+```go
+select {
+    case v := <- canal_1
+    //logica a ejecutar si se recibe datos del canal 1
+    case v := <- canal_2
+    //logica a ejecutar si se recibe datos del canal 2
+    case v := <- canal_3
+    //logica a ejecutar si se recibe datos del canal 3
+    default:
+    // opcional una logica a ejecutar en caso de no recibir datos de ninguna
+}
+```
+
+La gorrutina escuchara simultaneamente los remitentes y ejecutara la accíon segun sea necesaria como el siguiente [ejemplo](./ejemplos/channels/5-multiplexion.go)
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func CentralMensajeria(sms, email, carta <-chan string) {
+	for {
+		select {
+		case num := <-sms:
+			fmt.Println("Recibido SMS del número", num)
+		case dir := <-email:
+			fmt.Println("Recibido Email de la dirección", dir)
+		case rem := <-carta:
+			fmt.Println("Recibida Carta del remitente", rem)
+		}
+	}
+}
+
+func main() {
+	sms := make(chan string, 5)
+	email := make(chan string, 5)
+	carta := make(chan string, 5)
+
+	go CentralMensajeria(sms, email, carta)
+
+	sms <- "3016679447"
+	email <- "andres.kenji@mail.com"
+	carta <- "shizu"
+	sms <- "3016847213"
+
+	time.Sleep(time.Second)
+
+}
+```
+
+## Cancelando ejecución segun un tiempo de espera
+
+Usando la sentencia `select` tambien es posible detener la espera de respuesta desde un canal con ayuda de la función time.After(time.Duration)
+
+```go
+ch := make(chan int)
+
+go func(){
+    fmt.Println("Calculando la respuesta a la gran pregunta de la vida")
+    time.Sleep(15 * time.Second)
+    ch <- 42
+}()
+fmt.Println("Esperando ...")
+select {
+    case ret := <- ch:
+        fmt.Println("Recibido:"ret)
+    case <- time.After(2 * time.Second):
+        fmt.Println("Error: Tiempo de espera agotado")
+}
+```
+Como puede adivinar viendo el codigo el programa termina antes de recibir una respuesta por parte de la función anonima esto debido a que en la sentencia select se cuenta con una espera de máximo dos segundos.
+
+# Context
+
+El [context][context] es un paquete de la librería estandar que provee un mecanismo para controlar tiempos limites, señales de cancelación, propagación y otros valores asociados a una petición de una api, operaciones concurrentes o entre multiples gorrutinas.
+
+## crear un context
+
+Para crear un context se puede usar la función `context.Background()` la cual retorna un context vacio, no cancelable como raiz del arbol de context, tambien se puede crear especificando un context con un tiempo limite usando las funciones `context.WithTimeout()` o `context.WithDeadline()`
+
+## Administar peticiones concurrentes a una API
+
+Considere un escenario en el cual necesita obtener datos de diferentes API de manera concurrente; Usando el context se puede asegurar de que todas las peticiones a las API sean canceladas en caso de que alguna falle o de que se exceda el tiempo limite especificado.
+
+```go
+package main
+import (
+    "context"
+    "fmt"
+    "net/http"
+    "time"
+)
+
+func main(){
+    ctx, cancel := context.WithTimeOut(context.Background(), 5*time.Second)
+    defer cancel()
+
+    urls := []string{
+         "https://api.example.com/users",
+        "https://api.example.com/products",
+        "https://api.example.com/orders",
+    }
+
+    results := make(chan string)
+
+    for _, url := range urls {
+        go fetchAPI(ctx,url, results)
+    }
+
+    for range urls {
+        fmt.Println(<- results)
+    }
+}
+
+func fetchAPI(ctx context.Context, url string, results chan <- string){
+    req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+    if err != nil {
+        results <- fmt.Sprintf("Error creando la petición para %s: %s",url, err.Error())
+        return
+    }
+
+    client := http.DefaultClient
+    resp, err := client.Do(req)
+    if err != nil {
+        results <- fmt.Sprintf("Error haciendo la petición para %s: %s",url, err.Error())
+        return
+    }
+    defer resp.Body.Close()
+
+    results <- fmt.Sprintf("Respuesta de %s: %d", url, resp.StatusCode)
+    
+}
+```
+
+En el anterior ejemplo se crea un context con un tiempo limite de 5 segundos, luego ejecutamos multiples gorrutinas para obtener datos de diferentes APIs de manera concurrente.
+
+La función `http.NewRequestWithContext()` se usa para crear peticiones HTTP con el context proveido si alguna de las peticiones excede el tiempo limite la señal de cancelación del context se propaga cancelando todas las demas peticiones.
+
+## Creando un context con timeout
+
+En este ejemplo creamos un contex con un tiempo limite de dos segundos y lo usamos pata simular una operación 
+
+```go
+package main
+
+import (
+ "context"
+ "fmt"
+ "time"
+)
+
+func main() {
+ ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+ defer cancel()
+
+ go performTask(ctx)
+
+ select {
+ case <-ctx.Done():
+  fmt.Println("Task timed out")
+ }
+}
+
+func performTask(ctx context.Context) {
+ select {
+ case <-time.After(5 * time.Second):
+  fmt.Println("Task completed successfully")
+ }
+}
+```
+En el anterior ejemplo la función performTask simula una tarea que requiere de 5 segundos para concluir, sin embargo, el context cuenta con un tiempo limite de 2 segundos por lo cual la aplicación va a terminar con un timeout.
+
+## Propagando un context
+
+Una vez que se ha creado un context este puede ser propagado entre diferentes funciones o gorrutinas pasandolo como argumento, de esta manera todas las operaciones relacionadas comparten el mismo contexto de cancelación o otros valores.
+
+En el siguiente ejemplo creamos un context padre y lo propagamos a multiples gorrutinas para realizar tareas concurrentes.
+```go
+package main
+
+import (
+ "context"
+ "fmt"
+)
+
+func main() {
+ ctx := context.Background()
+
+ ctx = context.WithValue(ctx, "UserID", 123)
+
+ go performTask(ctx)
+
+ // Continue with other operations
+}
+
+func performTask(ctx context.Context) {
+ userID := ctx.Value("UserID")
+ fmt.Println("User ID:", userID)
+}
+```
+En el anterior ejemplo se crea un context padre y se le agrega un valor y luego es pasado como argumento a una gorrutina (aunque puede pasarse a varias) para que use el dato entregado en su operación.
+
+## Recuperando datos desde un context
+
+A demás de propagar un context tambien se pueden almacenar datos en el y de esta manera acceder a datos o parametros importantes segun el alcance de una función de de una gorrutina.
+
+En el siguiente ejemplo se crea un context con información del usuario y se entrega.
+```go
+package main
+
+import (
+ "context"
+ "fmt"
+)
+
+func main() {
+ ctx := context.WithValue(context.Background(), "UserID", 123)
+
+ processRequest(ctx)
+}
+
+func processRequest(ctx context.Context) {
+ userID := ctx.Value("UserID").(int)
+ fmt.Println("Processing request for User ID:", userID)
+}
+```
+
+# Servicios Web
+
+Los servicios web son componentes de software diseñados para soportar la interoperabilidad entre diferentes sistemas de aplicaciones a través de una red, generalmente Internet. Permiten que diferentes aplicaciones se comuniquen e intercambien datos entre sí sin importar las plataformas o lenguajes de programación en los que estén construidas. A continuación, se detallan los conceptos y características principales de los servicios web:
+
+## Conceptos Clave
+- **Interoperabilidad**: Los servicios web permiten que aplicaciones diferentes se comuniquen y trabajen juntas, independientemente de las plataformas o lenguajes de programación en los que estén desarrolladas.
+
+- **Protocolo HTTP/HTTPS**: La mayoría de los servicios web se comunican a través del protocolo HTTP/HTTPS, lo que les permite funcionar a través de Internet o dentro de redes privadas, la web se concibió como un conjunto de documentos disponibles y enlazados mediante un localizador uniforme de recursos (Uniform Resource Locator) **URL**.
+
+    Una URL sigue la siguiente estructura: protocolo://servidor:puerto/ruta/al/recurso
+
+- **Formato de Datos**: Los servicios web generalmente utilizan formatos de datos estandarizados como XML (Extensible Markup Language) o JSON (JavaScript Object Notation) para la comunicación.
+
+## Tipos de Servicios Web
+
+1. **SOAP (Simple Object Access Protocol):**
+
+- **Descripción:** Es un protocolo basado en XML para intercambiar información estructurada en la implementación de servicios web en redes informáticas.
+- **Características:** Define estrictamente cómo se deben codificar los datos, las reglas para realizar llamadas de procedimiento remoto y cómo manejar los errores.
+- **Uso:** Común en entornos empresariales donde se requiere una gran seguridad y transacciones complejas.
+
+2. **REST (Representational State Transfer):**
+
+REST es el acronimo de Representational State Transfer y se ha convertido en un estandar de facto para la comunicación entre programas mediante el protocolo HTTP.
+
+HTTP se concibió principalmente para el transporte de documentos a través de internet, sin embargo, su versatilidad y su velocidad permitio adoptar nuevas funciones para mantener el estado de los datos de diferentes entidades como los datos del usuario, objetos de una tienda y su disponibilidad etc.
+
+- **Descripción:** Es un estilo arquitectónico para servicios web que utiliza métodos HTTP estándar y es más simple y ligero que SOAP.
+- **Características:** Utiliza verbos HTTP (GET, POST, PUT, DELETE) y se basa en recursos identificados por URIs (Uniform Resource Identifiers). Los datos suelen intercambiarse en formato JSON o XML.
+- **Uso:** Popular en aplicaciones web y móviles debido a su simplicidad, rendimiento y escalabilidad.
+
+## Componentes de un Servicio Web
+
+- **Proveedor de Servicio (Service Provider):** La aplicación que proporciona el servicio web y hace que esté disponible para los consumidores.
+- **Consumidor de Servicio (Service Consumer):** La aplicación que utiliza el servicio web proporcionado por el proveedor.
+Registro de Servicio (Service Registry):
+
+Un directorio que permite a los consumidores descubrir y encontrar servicios web disponibles.
+
+Ejemplo de Funcionamiento
+
+### RESTful Service
+
+- Cliente: Una aplicación móvil que necesita acceder a datos de usuario desde un servidor.
+- Solicitud: El cliente realiza una solicitud HTTP GET a https://api.example.com/users/123.
+- Respuesta: El servidor responde con los datos del usuario en formato JSON:
+```json
+{
+  "id": 123,
+  "name": "John Doe",
+  "email": "john.doe@example.com"
+}
+```
+### SOAP Service
+
+- Cliente: Una aplicación de gestión empresarial que necesita realizar una transacción compleja.
+- Solicitud: El cliente envía una solicitud SOAP en formato XML a https://api.example.com/transaction:
+```xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:web="http://example.com/webservice">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <web:ProcessTransaction>
+         <web:TransactionId>12345</web:TransactionId>
+         <web:Amount>100.00</web:Amount>
+      </web:ProcessTransaction>
+   </soapenv:Body>
+</soapenv:Envelope>
+```
+
+- Respuesta: El servidor responde con el resultado de la transacción en formato XML.
+
+## Beneficios de los Servicios Web
+
+- Interoperabilidad: Permiten que diferentes aplicaciones trabajen juntas sin importar sus plataformas subyacentes.
+- Reutilización: Facilitan la creación de componentes reutilizables que pueden ser utilizados por diferentes aplicaciones.
+- Integración: Permiten la integración de aplicaciones y sistemas existentes con nuevas aplicaciones.
+- Escalabilidad: Pueden ser escalados fácilmente para manejar grandes cantidades de tráfico y datos.
+
+# Creación de servicios WEB con Go
+
+Crear servicios web con Go (Golang) implica varios pasos, desde configurar el entorno de desarrollo hasta implementar, probar y desplegar el servicio web, para esto utilizaremos en su mayoria el paquete [net/http][net/http] el cual hace parte de la libreria estandar.
+
+## http.Handler
+
+La interfaz http.Handler implementa un unico método el cual es:
+```go
+ServeHTTP(http.ResponseWriter, *http.Request)
+```
+El método ServeHTTP es el encargado de atender cualquier tipo de petición HTTP y recibe dos argumentos:
+- **http.ResponseWriter:** Se utiliza para enviar una respuesta al cliente.
+- ***http.Request:** Este puntero contiene la información sobre la petición del cliente, como las cabeceras, URL, método, cuerpo de la petición etc.
+
+## Funciones http.ListenAndServe y http.ListenAndServeTLS
+
+Estas funciones crearan un servidor web que recibirá peticiones en el puerto indicado y las enviara al http.Handler que se pase como argumento.
+
+- **http.ListenAndServe** crea un servidor normal sin ningun tipo de seguridad y su firma es la siguiente:
+    `func ListenAndServe(addr string, handler Handler) error`
+    - addr: es una dirección de interner que conste de un nombre de equipo o dirección IP seguida de **:** y el puerto de escucha, sino se especifica ni puerto ni ip Go escuchara por defecto por 127.0.0.1:8080
+
+- **http.ListenAndServeTLS** crea un servidor HTTPS es decir con un cifrado de extremo a extremo y su firma es:
+    `func ListenAndServeTLS(addr, certFile, keyFile string, handler Handler) error`
+    - certFile y keyFile son las rutas hacia el archivo que contiene los certificados y claves del servidor.
+
+Las funciones ListenAndServe y ListenAndServeTLS no deberian parar nunca a menos que el programa sea interrumpido, Si las funciones termina prematuramente retornan un error.
+
+## Ejemplo de servidor HTTP
+
+A continuación un ejemplo simple de un servidor HTTP con el cual se realiza una implementación sencilla del metodo http.Handler para cada petición del cliente.
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+type Holaservicio struct{}
+
+func (hs *Holaservicio) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Add("Content-Type", "Text/html")
+
+	documento := fmt.Sprintf(`
+    <h1>Bienvenido!</h1>
+    <p>Ruta de acceso: %s</p>
+    `, req.URL.Path)
+
+	rw.Write([]byte(documento))
+}
+
+func main() {
+	panic(http.ListenAndServe(":8000",&Holaservicio{}))
+}
+
+```
+El tipo Holaservicio implementa la interfaz http.Handler. en cada petición del usuario retorna una respuesta que contiene lo siguiente:
+- Código de estado 200 OK, si no se especifica nada mediante el metodo WriteHeader(int), por defecto será 200
+- Cabecera Content-Type con el valor text/html que indica que el documento tiene formato html.
+- Cuerpo del mensaje como un documento html en el que se provee información de la ruta indicada en la URL
+
+## Creación de un cliente
+
+El paquete http provee el tipo de dato http.Client que se puede instanciar de la siguiente manera:
+```go
+client := http.Client{}
+```
+Sin embargo, es recomendable especificar un tiempo máximo de espera tras el cual una petición a un servicio fallará si esta no responde en el tiempo especificado.
+```go
+client := http.Client{
+    Timeout: 5 * time.Second,
+}
+```
+La forma comun de realizar una petición es mediante el tipo de datos http.Request, que se puede construir mediante el método http.NewRequest, cuya firma es la siguiente:
+```go
+func NewRequest(metodo, url string, cuerpo io.Reader)(*http.Request, error)
+```
+- metodo es el método de la petición el cual es directamente alguno de los valores "GET", "POST", "PUT", "DELETE"; es reconmendable usar las constantes globales http.MethodGet, http.MethodPost, etc.
+- url es la dirección completa 
+- cuerpo es un flujo de entrada al contenidousado en peticiones de tipo POST o PUT, en otros tipos de peticiones puede ser `nil`
+
+una vez que se ha creado el apuntador *http.Request este se debe utilizar en el metodo `Do` del tipo http.Client cuya firma es la siguiente:
+
+```go
+func (c *http.Client) Do (req *http.Request) (*http.Response, error)
+```
+
+Este método regresa una respuesta a la petición que indicará valores tales como el codigo de respuesta, los cabeceros y el cuerpo o documento de respuesta.
+
+```go
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+)
+
+func main() {
+
+	req, err := http.NewRequest(http.MethodGet,"https://pokeapi.co/api/v2/pokemon/pikachu", nil)
+	if err != nil {
+		panic(err)
+	}
+	client := http.Client{
+		Timeout: 5 *time.Second,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Codigo de respuesta:",resp.StatusCode)
+	fmt.Println("Content-Type",resp.Header["Content-Type"])
+	cuerpo, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("------------")
+	fmt.Println(string(cuerpo))
 
 
-
-
-
+}
+```
 
 
 
@@ -2481,3 +2998,5 @@ func main() {
 [pila-de-ejecucion]:https://es.wikipedia.org/wiki/Pila_de_llamadas
 [waitGroups]:https://gobyexample.com/waitgroups
 [channels]:https://steemit.com/cervantes/@orlmicron/channels-en-go-golang
+[context]:https://pkg.go.dev/context
+[net/http]:https://pkg.go.dev/net/http
