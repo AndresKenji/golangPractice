@@ -1,7 +1,11 @@
 package rabbit
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -11,9 +15,16 @@ type Consumer struct {
 	queueName string
 }
 
-func NewConsumer(conn *amqp.Connection) (Consumer, error) {
+type Payload struct {
+	Name string `json:"name"`
+	Data string `json:"data"`
+}
+
+
+func NewConsumer(conn *amqp.Connection, queuename string) (Consumer, error) {
 	consumer := Consumer{
 		conn: conn,
+		queueName: queuename,
 	}
 
 	return consumer, nil
@@ -29,40 +40,41 @@ func (consumer *Consumer) ListenTopics(topics []string, exchangeName string) err
 	}
 	defer ch.Close()
 
-	
-	q, err := DeclareQueue(ch, s)
+	// Declarando la cola
+	q, err := DeclareQueue(ch, consumer.queueName)
 	if err != nil {
 		return err
 	}
+	// se agregan los topics al exchange
 	for _, s := range topics {
 		ch.QueueBind(
-			q.Name,
-			s,
-			exchangeName,
-			false,
-			nil,
+			q.Name, // Name
+			s, // key 
+			exchangeName, // exchange
+			false, // no wait
+			nil, // args
 		)
 		if err != nil {
 			return err
 		}
 	}
-
+	// se recuperan los mensajes 
 	messages, err := ch.Consume(q.Name, "", true, false, false, false, nil)
 	if err != nil {
 		return err
 	}
-
-	forever := make(chan bool)
-
+	// Se envian los mensajes a su propia gorrutina y se trabajan desde allá
 	go func() {
 		for d := range messages {
 			var payload Payload
 			_ = json.Unmarshal(d.Body, &payload)
 			go handlePayload(payload)
-		}
-	}()
-
+			}
+		}()
+			
 	fmt.Printf("Esperando mensajes en [Exchange, Queue] [logs_topic, %s]\n", q.Name)
+	// canal para mantener la función corriendo
+	forever := make(chan bool)
 	<-forever
 
 	return nil

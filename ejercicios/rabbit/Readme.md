@@ -10,18 +10,69 @@ En este proyecto usaremos RabitMQ con docker compose y crearemos un productor y 
 
 ## Rabbitmq
 
-[RabbitMQ][rabbitmq] es un software de intermediación de mensajes (message broker) de código abierto que facilita la comunicación entre aplicaciones mediante el intercambio de mensajes. Implementa el protocolo [AMQP][amqp] (Advanced Message Queuing Protocol) y es utilizado para enviar, recibir y encolar mensajes entre productores (aplicaciones que envían mensajes) y consumidores (aplicaciones que reciben mensajes).
+[RabbitMQ][rabbitmq] es un software de código abierto para el manejo de colas de mensajes, también conocido como message broker o middleware de mensajería. Facilita la comunicación entre aplicaciones al enviar, recibir y gestionar mensajes de manera eficiente y fiable. 
 
-### Características de RabbitMQ:
+### Características de RabbitMQ
 
-- Intermediación de Mensajes: RabbitMQ actúa como intermediario para transmitir mensajes entre diferentes aplicaciones, sistemas o servicios.
-- Colas de Mensajes: Los mensajes se encolan hasta que un consumidor los recibe y los procesa.
-- Soporte para Múltiples Protocolos: Aunque implementa principalmente AMQP, también soporta otros protocolos como MQTT y STOMP.
-- Alta Disponibilidad: RabbitMQ puede ser configurado en clústeres para alta disponibilidad y recuperación ante fallos.
-- Persistencia de Mensajes: Permite la persistencia de mensajes en disco para asegurar que no se pierdan en caso de fallos.
-- Enrutamiento Flexible: Ofrece varias formas de enrutamiento de mensajes, incluyendo intercambio directo, intercambio de temas y enrutamiento basado en encabezados.
-- Seguridad: Soporta autenticación y autorización, así como cifrado para asegurar la transmisión de mensajes.
-- Monitoreo y Gestión: Incluye herramientas de administración y monitoreo a través de una interfaz web, así como APIs para gestión programática.
+1. Protocolo AMQP: RabbitMQ implementa el protocolo AMQP (Advanced Message Queuing Protocol), que define la semántica para la mensajería, garantizando una comunicación segura y fiable entre los sistemas.
+
+2. Colas de Mensajes: Permite la creación de colas donde los mensajes se almacenan hasta que son procesados por un consumidor.
+
+3. Intercambios (Exchanges): Utiliza intercambios para dirigir los mensajes a las colas. Los intercambios pueden ser de diferentes tipos, como directos, fanout, tópicos y encabezados, dependiendo de cómo se quiera enrutar el mensaje.
+
+4. Persistencia: Los mensajes pueden ser persistentes (guardados en el disco) para asegurar que no se pierdan en caso de fallos del sistema.
+
+5. Alta Disponibilidad: Soporta la replicación de colas en múltiples nodos para asegurar la disponibilidad y la tolerancia a fallos.
+
+6. Plugins y Extensiones: RabbitMQ tiene una arquitectura extensible que permite la incorporación de plugins para añadir funcionalidades adicionales.
+
+7. Herramientas de Administración: Ofrece una interfaz de gestión web y una serie de herramientas de línea de comandos para la administración y monitoreo de mensajes, colas, intercambios y más.
+
+### Entidades de Rabbit
+
+[RabbitMQ][gotoiot] utiliza terminos que definen el comportamiento de cada entidad involucrada en el envio y la recepción de los mensajes.
+
+- **Productor:** Todo programa que envie mensajes es un productor
+- **Cola:** Es un buffer de memoria en el que se contiene a los mensajes que son enviados por los productores y seran consumidos por algun consumidor.
+- **Consumidorr:** Todo programa que espera recibir mensajes de una cola es un consumidor y consumir significa recibir y procesar un mensaje.
+
+![partes](./readme-img/rabbitparts.png)
+
+Dentro del modelo AMQP 0-9-1, los productores envían mensajes hacia los exchanges indicando diferentes propiedades que son utilizadas por el broker para realizar el enrutamiento. Los exchanges distribuyen copias de los mensajes a las colas vinculadas utilizando diferentes criterios. Los criterios de asociación entre exchanges y colas se denominan binding, y cada tipo de exchange posee sus propias reglas para enrutar los mensajes hacia las colas. Finalmente, el broker envía los mensajes a los consumidores suscritos a las colas mediante una notificación push, o bien mediante un mecanismo de polling. Veamos en esta imagen este modelo simplificado.
+
+#### Exchanges
+
+Los exchanges son los enrutadores de los mensajes a las colas, su objetivo es enrutar los mensajes a las colas que cumplan con los criterios si hay alguna. 
+
+Los atributos mas importantes de un Exchange son:
+- Name
+- Durable (determina si sobrevive luego de un reinicio del broker)
+- Auto-delete (Se elimina cuando la ultima cola asociada a el se libera)
+
+El algoritmo de enrutamiento cambia según el tipo de exchange que se utilice los cuales son:
+
+- **Default:** Es el tipo predefinido cada cola  que se crea se vincula automáticamente con una routing_key que es el mismo nombre de la cola; Ejemplo si se declara una cola con el nombre de syslogs, el broker la vincula al default exchange utilizando syslogs como routing_key, cuando un mensaje es publicado en el default exchange con la routing_key syslogs se enruta a la cola syslogs.
+
+- **Direct:** Entrega mensajes a las colas según la routing_key con la que se publican los mensajes. Las colas se vinculan al exchange con una routing_key y al llegar un mensaje nuevo al exchange con la misma routing_key es enviado a la cola.
+
+	![directo](./readme-img/directExchange.png)
+
+- **Fanout:** Envia los mensajes a todas las colas que se encuentran vinculadas a el sin tomar en cuenta la routing_key del mensaje ni del binding.
+
+	![directo](./readme-img/fanoutExchange.png)
+
+- **Topic:** Enruta los mensajes a las colas que según la concidencia entre la routing_key del mensaje y la routing_key con la que se realiza el binding entre el exchange y las colas.<br>
+Los mensajes enviados a un topic exchange tienen una routing_key que son una lista de palabras delimitadas por puntos. Se puede implementar cualquier combinación de palabras siempre y cuando no superen los 255 bytes. Algunos ejemplos de routing_key válidas son "building1.room1.sensor3.temperature" o "chat5.user3.alert".<br>
+Para que los mensajes publicados en un topic exchange puedan llegar a una cola, la routing_key utilizada en el binding que los vincula debe tener el mismo formato que la de publicación del mensaje. Así mismo, hay caracteres especiales que pueden dar flexibilidad a este esquema. El caracter asterisco (*) puede sustituir exactamente una palabra, mientras que el caracter numeral (#) puede sustituir varias palabras.
+
+	![directo](./readme-img/topicExchange.png)
+
+- **Header:** Un header exchange está diseñado para enrutar mensajes a través de varios atributos que se expresan en el encabezado del mensaje en vez de como routing_key. Un mensaje se considera coincidente si el valor del header es igual al valor especificado en el binding entre la cola y el exchange. <br>
+Es posible vincular una cola a un header exchange usando más de un atributo en el header, lo que permite implementar mecanismos más complejos de enrutamiento de los que vimos hasta ahora. <br>
+
+	![directo](./readme-img/headerExchange.png)
+
+
 
 ### Casos de Uso:
 
@@ -252,3 +303,5 @@ log.Printf(" [x] Se ha enviado el mensaje: %s \n", mPayload)
 
 [rabbitmq]:https://www.rabbitmq.com
 [amqp]:https://es.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol
+[gotoiot]:https://www.gotoiot.com/pages/articles/rabbitmq_intro/index.html#:~:text=Los%20exchanges%20AMQP%200-9,no%20implementar%20explícitamente%20ninguno%20estándar.
+[rabbitmq-tutorial]:https://www.rabbitmq.com/tutorials/amqp-concepts
