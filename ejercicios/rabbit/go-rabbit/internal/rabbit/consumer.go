@@ -1,130 +1,93 @@
 package rabbit
 
 import (
-	"bytes"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
-	"net/http"
+	"os"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type Consumer struct {
-	conn      *amqp.Connection
+	conn *amqp.Connection
 	queueName string
+	channel *amqp.Channel
 }
 
-type Payload struct {
-	Name string `json:"name"`
-	Data string `json:"data"`
-}
+type MessageHandler func(amqp.Delivery, string) error
 
+func NewConsumer() (Consumer, error) {
+	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s",os.Getenv("rb_user"),os.Getenv("rb_pwd"),os.Getenv("rb_ip"))
 
-func NewConsumer(conn *amqp.Connection, queuename string) (Consumer, error) {
-	consumer := Consumer{
-		conn: conn,
-		queueName: queuename,
+	connection, err := Connect(rabbitMQURL)
+	if err != nil {
+		return Consumer{} , err
 	}
 
+	consumer := Consumer {
+		conn: connection,
+	}
 	return consumer, nil
 
 }
 
 
+func (c *Consumer) SetQueue(queueName string) error {
+	channel, err := c.conn.Channel()
+	if err != nil {
+		return err
+	}
+	q, err := DeclareQueue(channel, queueName)
+	if err != nil {
+		return err
+	}
 
-func (consumer *Consumer) ListenTopics(topics []string, exchangeName string) error {
-	ch, err := consumer.conn.Channel()
-	if err != nil {
-		return err
-	}
-	defer ch.Close()
+	c.queueName = q.Name
+	c.channel = channel
 
-	// Declarando la cola
-	q, err := DeclareQueue(ch, consumer.queueName)
-	if err != nil {
-		return err
-	}
-	// se agregan los topics al exchange
-	for _, s := range topics {
-		ch.QueueBind(
-			q.Name, // Name
-			s, // key 
-			exchangeName, // exchange
-			false, // no wait
-			nil, // args
-		)
-		if err != nil {
-			return err
-		}
-	}
-	// se recuperan los mensajes 
-	messages, err := ch.Consume(q.Name, "", true, false, false, false, nil)
-	if err != nil {
-		return err
-	}
-	// Se envian los mensajes a su propia gorrutina y se trabajan desde allá
-	go func() {
-		for d := range messages {
-			var payload Payload
-			_ = json.Unmarshal(d.Body, &payload)
-			go handlePayload(payload)
-			}
-		}()
-			
-	fmt.Printf("Esperando mensajes en [Exchange, Queue] [logs_topic, %s]\n", q.Name)
-	// canal para mantener la función corriendo
-	forever := make(chan bool)
-	<-forever
 
 	return nil
 }
 
-func handlePayload(payload Payload) {
-	switch payload.Name {
-	case "log", "event":
-		// enviar a logs
-		err := logEvent(payload)
-		if err != nil {
-			log.Println(err)
-		}
+func (c *Consumer) Listen(handler MessageHandler) error {
 
-	case "auth":
-		// autenticarse
-
-	// se pueden tener tantos como se necesiten en la lógica
-	default:
-		err := logEvent(payload)
-		if err != nil {
-			log.Println(err)
-		}
+	if c.queueName == ""{
+		return errors.New("no se ha declarado una cola")
 	}
-}
+	defer func ()  {
+		log.Println("Fin del metodo Listen")
+		c.channel.Close()
+	}()
 
-func logEvent(entry Payload) error {
-	jsonData, _ := json.MarshalIndent(entry, "", "\t")
-	//log.Println("Entrando al servicio de log con la data: ",string(jsonData))
 
-	logServiceURL := "http://logger-service/log"
-
-	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
+	messages, err := c.channel.Consume(
+		c.queueName, // cola
+		"",     // consumidor
+		true,   // auto-ack
+		false,  // exclusiva
+		false,  // no-local
+		false,  // sin esperar
+		nil,    // argumentos
+	)
 	if err != nil {
 		return err
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-
-	response, err := client.Do(request)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusAccepted {
-		return err
-	}
-
+	go func ()  {
+		for d := range messages {
+			if err := handler(d, c.queueName); err != nil {
+				log.Printf("Error handling message: %s", err)
+			}
+		}
+		defer func ()  {
+			log.Println("Se ha terminado la escucha en la cola:",c.queueName)
+		}()
+	}()
+	
+	forever := make(chan bool)
+	fmt.Printf("Esperando mensajes en [%s]\n", c.queueName)
+	<-forever
+	
 	return nil
 }

@@ -16,7 +16,7 @@ func Connect(url string) (*amqp.Connection, error) {
 	// no continuar hasta que rabbit esté listo
 
 	for {
-		c, err := amqp.Dial("amqp://guest:guest@rabbitmq")
+		c, err := amqp.Dial(url)
 		if err != nil {
 			log.Println("Rabbitmq no está listo aun...")
 			counts++
@@ -54,10 +54,11 @@ func DeclareExchange(ch *amqp.Channel, name, _type string) error {
 func DeclareQueue(ch *amqp.Channel,name string) (amqp.Queue, error) {
 	return ch.QueueDeclare(
 		name,    // name
-		false, // durable
+		true, // durable
 		false, // delete when unused
-		true,  // exclusive
+		false,  // exclusive
 		false, // no wait
 		nil,   // arguments
 	)
 }
+
