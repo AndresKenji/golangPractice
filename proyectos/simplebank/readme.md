@@ -4,7 +4,7 @@ Cuando se trabaja con bases de datos es comun tener que realizar migraciones ent
 
 ## Migrar bases de datos con Golang
 
-Haciendo uso de la libreria [Migrate][golang-migrate], podemo usar las opciones de la linea de comandos siguiendo las instrucciones de [instalación][https://github.com/golang-migrate/migrate/tree/master/cmd/migrate]
+Haciendo uso de la libreria [Migrate][golang-migrate], podemo usar las opciones de la linea de comandos siguiendo las instrucciones de [instalación](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
 
 Para usar migrate podemos validar la documentación oficial del proyecto en la cual encontramos lo siguiente
 
