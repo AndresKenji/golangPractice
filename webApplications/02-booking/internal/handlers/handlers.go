@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"bookings/pkg/config"
-	"bookings/pkg/models"
-	"bookings/pkg/render"
+	"bookings/internal/config"
+	"bookings/internal/forms"
+	"bookings/internal/models"
+	"bookings/internal/render"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -53,6 +54,13 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 
 // Reservation renders the make a reservation page and display form
 func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request){
+	render.RenderTemplate(w, r, "make-reservation.page.tmpl",&models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
+// PostReservation handles the posting of a reservation form
+func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request){
 	render.RenderTemplate(w, r, "make-reservation.page.tmpl",&models.TemplateData{})
 }
 
