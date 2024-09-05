@@ -1,6 +1,7 @@
 package hardware
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -93,4 +94,84 @@ func GetDiskSection() (*DiskInfo, error) {
 	di.FreeSpaceGB = float64(diskStat.Free) / (1024 * 1024 * 1024)
 	di.UsedSpaceGB = float64(diskStat.Used) / (1024 * 1024 * 1024)
 	return di, nil
+}
+
+func (di *DiskInfo) GetHtml() string {
+	html := fmt.Sprintf(`
+	<table class="table table-dark table-striped">
+		<tr>
+			<td>Total</td>
+			<td>%v</td>
+		</tr>
+		<tr>
+			<td>Used</td>
+			<td">%v</td>
+		</tr>
+		<tr>
+			<td>Free</td>
+			<td">%v</td>
+		</tr>
+    </table>
+	`, di.TotalSpaceGB, di.UsedSpaceGB, di.FreeSpaceGB)
+
+	return html
+}
+
+func (ci *CpuInfo) GetHtml() string {
+	html := fmt.Sprintf(`
+	<table class="table table-dark table-striped">
+		<tr>
+			<td>CPU</td>
+			<td>%s</td>
+		</tr>
+		<tr>
+			<td>Cores</td>
+			<td>%d</td>
+		</tr>
+		<tr>
+			<td>Logical Cores</td>
+			<td>%d</td>
+		</tr>
+		<tr>
+			<td>Use Percent</td>
+			<td>%v</td>
+		</tr>
+	</table>
+	`,ci.CPU, ci.Cores, ci.LogicalCores, ci.Percent)
+
+	return html
+}
+
+func (si *SystemInfo) GetHtml() string {
+	html := fmt.Sprintf(`
+	<table class="table table-dark table-striped">
+		<tr>
+			<td>Host Name</td>
+			<td>%s</td>
+		</tr>
+		<tr>
+			<td>Memory MB</td>
+			<td>%d</td>
+		</tr>
+		<tr>
+			<td>Free Memory MB</td>
+			<td>%d</td>
+		</tr>
+		<tr>
+			<td>OS</td>
+			<td>%s</td>
+		</tr>
+		<tr>
+			<td>Platform</td>
+			<td>%s</td>
+		</tr>
+		<tr>
+			<td>Uptime</td>
+			<td>%d</td>
+		</tr>
+	</table>
+	`,si.Hostname, si.MemoryMB, si.FreeMemoryMB, si.Os, si.Platform, si.Uptime)
+
+	return html
+
 }

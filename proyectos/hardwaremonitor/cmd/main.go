@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"hwmonitor/internal/hardware"
@@ -38,32 +37,9 @@ func main() {
 
 			html := `
 			<strong hx-swap-oob="innerHTML:#update-timestamp">Last Update ` + timeStamp + `</strong>
-
-			<td hx-swap-oob="innerHTML:#hostname-value">` + systemSection.Hostname + `</td>
-
-			<td hx-swap-oob="innerHTML:#memory-value">` + strconv.Itoa(systemSection.MemoryMB) + `</td>
-
-			<td hx-swap-oob="innerHTML:#free-memory-value">` + strconv.Itoa(systemSection.FreeMemoryMB) + `</td>
-
-			<td hx-swap-oob="innerHTML:#os-value">` + systemSection.Os + `</td>
-
-			<td hx-swap-oob="innerHTML:#platform-value">` + systemSection.Platform + `</td>
-
-			<td hx-swap-oob="innerHTML:#uptime-value">` + strconv.FormatUint(uint64(systemSection.Uptime), 10) + `</td>
-
-			<td hx-swap-oob="innerHTML:#disk-total-value">` + strconv.Itoa(int(diskSection.TotalSpaceGB)) + `</td>
-
-			<td hx-swap-oob="innerHTML:#disk-used-value">` + strconv.Itoa(int(diskSection.UsedSpaceGB)) + `</td>
-
-			<td hx-swap-oob="innerHTML:#disk-free-value">` + strconv.Itoa(int(diskSection.FreeSpaceGB)) + `</td>
-
-			<td hx-swap-oob="innerHTML:#cpu-value">` + cpuSection.CPU + `</td>
-
-			<td hx-swap-oob="innerHTML:#cpu-cores-value">` + strconv.Itoa(cpuSection.Cores) + `</td>
-
-			<td hx-swap-oob="innerHTML:#cpu-logicalcores-value">` + strconv.Itoa(cpuSection.LogicalCores) + `</td>
-			
-			<td hx-swap-oob="innerHTML:#cpu-percent-value">` + strconv.Itoa(int(cpuSection.Percent)) + `%</td>
+			<div hx-swap-oob="innerHTML:#system-value">`+systemSection.GetHtml()+`</div>
+			<div hx-swap-oob="innerHTML:#disk-value">`+diskSection.GetHtml()+`</div>
+			<div hx-swap-oob="innerHTML:#cpu-value">`+cpuSection.GetHtml()+`</div>
 			`
 			s.Broadcast([]byte(html))
 
