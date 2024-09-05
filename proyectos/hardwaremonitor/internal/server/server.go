@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"embed"
 	"log"
 	"net/http"
 	"sync"
@@ -9,6 +10,10 @@ import (
 
 	"github.com/coder/websocket"
 )
+
+// content holds our static web server content.
+//go:embed html/index.html
+var indexHTML embed.FS 
 
 type Server struct {
 	SubcriberMessageBuffer int
@@ -27,7 +32,8 @@ func NewServer() *Server {
 		Subscribers:            make(map[*subscriber]struct{}),
 	}
 
-	s.Mux.Handle("/", http.FileServer(http.Dir("./htmx")))
+	//s.Mux.Handle("/", http.FileServer(http.Dir("./html")))
+	s.Mux.Handle("/", http.FileServer(http.FS(indexHTML)))
 	s.Mux.HandleFunc("/ws", s.subscribeHandler)
 	return s
 }
@@ -91,7 +97,6 @@ func (s *Server) Broadcast(msg []byte) {
 		select {
 		case subscriber.msgs <- msg:
 		default:
-			// If the subscriber's message buffer is full, skip the message.
 			log.Println("Skipping subscriber due to full buffer")
 		}
 	}

@@ -2,12 +2,14 @@ package hardware
 
 import (
 	"fmt"
+	"math"
 	"runtime"
 
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/net"
 )
 
 type SystemInfo struct {
@@ -17,6 +19,22 @@ type SystemInfo struct {
 	Os           string
 	Platform     string
 	Uptime       uint64
+}
+
+type NetInfo struct {
+	Interfaces []net.InterfaceStat
+
+}
+
+func GetNetSection() (*NetInfo, error) {
+	ni := &NetInfo{}
+	itf, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+	ni.Interfaces = itf
+
+	return ni, nil
 }
 
 func GetSystemSection() (*SystemInfo, error) {
@@ -72,7 +90,7 @@ func GetCpuSection() (*CpuInfo, error) {
 	ci.CPU = cpuStat[0].ModelName
 	ci.Cores = cores
 	ci.LogicalCores = logicalcores
-	ci.Percent = percent[0] // O considera promediar el valor si tienes múltiples CPUs
+	ci.Percent = math.Round(percent[0])
 
 	return ci, nil
 }
@@ -90,27 +108,18 @@ func GetDiskSection() (*DiskInfo, error) {
 		return nil, err
 	}
 
-	di.TotalSpaceGB = float64(diskStat.Total) / (1024 * 1024 * 1024)
-	di.FreeSpaceGB = float64(diskStat.Free) / (1024 * 1024 * 1024)
-	di.UsedSpaceGB = float64(diskStat.Used) / (1024 * 1024 * 1024)
+	di.TotalSpaceGB = math.Round((float64(diskStat.Total) / (1024 * 1024 * 1024))) 
+	di.FreeSpaceGB = math.Round(float64(diskStat.Free) / (1024 * 1024 * 1024)) 
+	di.UsedSpaceGB = math.Round(float64(diskStat.Used) / (1024 * 1024 * 1024)) 
 	return di, nil
 }
 
 func (di *DiskInfo) GetHtml() string {
 	html := fmt.Sprintf(`
 	<table class="table table-dark table-striped">
-		<tr>
-			<td>Total</td>
-			<td>%v</td>
-		</tr>
-		<tr>
-			<td>Used</td>
-			<td">%v</td>
-		</tr>
-		<tr>
-			<td>Free</td>
-			<td">%v</td>
-		</tr>
+		<tr><td>Total</td><td>%v GB</td></tr>
+		<tr><td>Used</td><td>%v GB</td></tr>
+		<tr><td>Free</td><td>%v GB</td></tr>
     </table>
 	`, di.TotalSpaceGB, di.UsedSpaceGB, di.FreeSpaceGB)
 
@@ -120,22 +129,10 @@ func (di *DiskInfo) GetHtml() string {
 func (ci *CpuInfo) GetHtml() string {
 	html := fmt.Sprintf(`
 	<table class="table table-dark table-striped">
-		<tr>
-			<td>CPU</td>
-			<td>%s</td>
-		</tr>
-		<tr>
-			<td>Cores</td>
-			<td>%d</td>
-		</tr>
-		<tr>
-			<td>Logical Cores</td>
-			<td>%d</td>
-		</tr>
-		<tr>
-			<td>Use Percent</td>
-			<td>%v</td>
-		</tr>
+		<tr><td>CPU</td><td>%s</td></tr>
+		<tr><td>Cores</td><td>%d</td></tr>
+		<tr><td>Logical Cores</td><td>%d</td></tr>
+		<tr><td>Use Percent</td><td>%v%%</td></tr>
 	</table>
 	`,ci.CPU, ci.Cores, ci.LogicalCores, ci.Percent)
 
@@ -145,33 +142,32 @@ func (ci *CpuInfo) GetHtml() string {
 func (si *SystemInfo) GetHtml() string {
 	html := fmt.Sprintf(`
 	<table class="table table-dark table-striped">
-		<tr>
-			<td>Host Name</td>
-			<td>%s</td>
-		</tr>
-		<tr>
-			<td>Memory MB</td>
-			<td>%d</td>
-		</tr>
-		<tr>
-			<td>Free Memory MB</td>
-			<td>%d</td>
-		</tr>
-		<tr>
-			<td>OS</td>
-			<td>%s</td>
-		</tr>
-		<tr>
-			<td>Platform</td>
-			<td>%s</td>
-		</tr>
-		<tr>
-			<td>Uptime</td>
-			<td>%d</td>
-		</tr>
+		<tr><td>Host Name</td><td>%s</td></tr>
+		<tr><td>Memory</td><td>%d MB</td></tr>
+		<tr><td>Free Memory</td><td>%d MB</td></tr>
+		<tr><td>OS</td><td>%s</td></tr>
+		<tr><td>Platform</td><td>%s</td></tr>
+		<tr><td>Uptime</td><td>%d seg</td></tr>
 	</table>
 	`,si.Hostname, si.MemoryMB, si.FreeMemoryMB, si.Os, si.Platform, si.Uptime)
 
 	return html
 
+}
+
+func (ni *NetInfo) GetHtml() string {
+	html := ""
+	for _, itf := range ni.Interfaces{
+		html += fmt.Sprintf(`
+		<div class="p-2"  style="max-height: 400px; max-width: 400px;">
+			<h4>%s</h4>
+			<table class="table table-dark table-striped">
+				<tr><td>IP</td><td>%s</td></tr>
+				<tr><td>MAC</td><td>%s</td></tr>
+				<tr><td>MTU</td><td>%d</td></tr>
+			</table>
+		</div>`,itf.Name, itf.Addrs[0].Addr, itf.HardwareAddr,itf.MTU) 
+	}
+
+	return html
 }

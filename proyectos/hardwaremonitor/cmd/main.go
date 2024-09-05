@@ -33,6 +33,12 @@ func main() {
 				continue
 			}
 
+			netSection, err := hardware.GetNetSection()
+			if err != nil {
+				fmt.Println("Error fetching Network section:", err)
+				continue
+			}
+
 			timeStamp := time.Now().Format("2006-01-02 15:04:05")
 
 			html := `
@@ -40,6 +46,7 @@ func main() {
 			<div hx-swap-oob="innerHTML:#system-value">`+systemSection.GetHtml()+`</div>
 			<div hx-swap-oob="innerHTML:#disk-value">`+diskSection.GetHtml()+`</div>
 			<div hx-swap-oob="innerHTML:#cpu-value">`+cpuSection.GetHtml()+`</div>
+			<div hx-swap-oob="innerHTML:#net-value">`+netSection.GetHtml()+`</div>
 			`
 			s.Broadcast([]byte(html))
 
