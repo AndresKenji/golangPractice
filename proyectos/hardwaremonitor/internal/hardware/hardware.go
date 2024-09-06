@@ -121,7 +121,6 @@ func GetDiskSection() (*DiskInfo, error) {
 		if err != nil {
 			return nil, err
 		}
-
 				
 		diskInfo := &Disk{
 			Path: diskStat.Path,
@@ -140,14 +139,17 @@ func (di *DiskInfo) GetHtml() string {
 	html := ""
 	for _, dsk := range di.Disks{
 		html += fmt.Sprintf(`
-		<div class="p-2"  style="max-height: 400px; max-width: 400px;">
-			<h4>%s</h4>
-			<table class="table table-dark table-striped">
-				<tr><td>Total</td><td>%v GB</td></tr>
-				<tr><td>Used</td><td>%v GB</td></tr>
-				<tr><td>Free</td><td>%v GB</td></tr>
-			</table>
-		</div>`,dsk.Path, dsk.TotalSpaceGB, dsk.UsedSpaceGB, dsk.FreeSpaceGB)
+		<div class="card text-bg-dark m-2 " style="width: 18rem;">
+			<div class="card-header">
+				%s
+			</div>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item list-group-item-dark">Total: %v GB</li>
+				<li class="list-group-item list-group-item-dark">Used %v GB</li>
+				<li class="list-group-item list-group-item-dark">Free %v GB</li>
+			</ul>
+		</div>
+		`,dsk.Path, dsk.TotalSpaceGB, dsk.UsedSpaceGB, dsk.FreeSpaceGB)
 	}
 
 	return html
@@ -186,14 +188,17 @@ func (ni *NetInfo) GetHtml() string {
 	html := ""
 	for _, itf := range ni.Interfaces{
 		html += fmt.Sprintf(`
-		<div class="p-2"  style="max-height: 400px; max-width: 400px;">
-			<h4>%s</h4>
-			<table class="table table-dark table-striped">
-				<tr><td>IP</td><td>%s</td></tr>
-				<tr><td>MAC</td><td>%s</td></tr>
-				<tr><td>MTU</td><td>%d</td></tr>
-			</table>
-		</div>`,itf.Name, itf.Addrs[0].Addr, itf.HardwareAddr,itf.MTU) 
+		<div class="card text-bg-dark m-2 " style="width: 18rem;">
+			<div class="card-header">
+				%s
+			</div>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item list-group-item-dark">IP: %s</li>
+				<li class="list-group-item list-group-item-dark">MAC %s</li>
+				<li class="list-group-item list-group-item-dark">MTU %d</li>
+			</ul>
+		</div>
+		`,itf.Name, itf.Addrs[0].Addr, itf.HardwareAddr,itf.MTU) 
 	}
 
 	return html
