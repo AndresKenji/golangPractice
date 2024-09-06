@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"embed"
+	"io"
 	"log"
 	"net/http"
 	"sync"
@@ -12,7 +13,7 @@ import (
 )
 
 // content holds our static web server content.
-//go:embed html/index.html
+//go:embed html
 var indexHTML embed.FS 
 
 type Server struct {
@@ -33,7 +34,27 @@ func NewServer() *Server {
 	}
 
 	//s.Mux.Handle("/", http.FileServer(http.Dir("./html")))
-	s.Mux.Handle("/", http.FileServer(http.FS(indexHTML)))
+	//s.Mux.Handle("/", http.FileServer(http.FS(indexHTML)))
+	// Handler for serving the embedded index.html
+	s.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Abrimos el archivo index.html embebido
+		file, err := indexHTML.Open("html/index.html")
+		if err != nil {
+			http.Error(w, "File not found", http.StatusNotFound)
+			return
+		}
+		defer file.Close()
+	
+		// Leemos el contenido del archivo
+		content, err := io.ReadAll(file)
+		if err != nil {
+			http.Error(w, "Failed to read file", http.StatusInternalServerError)
+			return
+		}
+	
+		// Escribimos el contenido en la respuesta HTTP
+		w.Write(content)
+	})
 	s.Mux.HandleFunc("/ws", s.subscribeHandler)
 	return s
 }

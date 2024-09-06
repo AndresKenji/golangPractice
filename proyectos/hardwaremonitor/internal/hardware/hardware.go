@@ -95,33 +95,60 @@ func GetCpuSection() (*CpuInfo, error) {
 	return ci, nil
 }
 
-type DiskInfo struct {
+type Disk struct {
+	Path string
 	TotalSpaceGB float64
 	UsedSpaceGB  float64
 	FreeSpaceGB  float64
 }
 
+type DiskInfo struct {
+	Disks []*Disk
+}
+
 func GetDiskSection() (*DiskInfo, error) {
-	di := &DiskInfo{}
-	diskStat, err := disk.Usage("/")
+	di := &DiskInfo{
+		Disks: []*Disk{},
+	}
+	
+	partitions, err := disk.Partitions(false)
 	if err != nil {
 		return nil, err
 	}
+	
+	for _, dsk := range partitions {
+		diskStat, err := disk.Usage(dsk.Mountpoint)
+		if err != nil {
+			return nil, err
+		}
 
-	di.TotalSpaceGB = math.Round((float64(diskStat.Total) / (1024 * 1024 * 1024))) 
-	di.FreeSpaceGB = math.Round(float64(diskStat.Free) / (1024 * 1024 * 1024)) 
-	di.UsedSpaceGB = math.Round(float64(diskStat.Used) / (1024 * 1024 * 1024)) 
+				
+		diskInfo := &Disk{
+			Path: diskStat.Path,
+			TotalSpaceGB: math.Round(float64(diskStat.Total) / (1024 * 1024 * 1024)),
+			FreeSpaceGB:  math.Round(float64(diskStat.Free) / (1024 * 1024 * 1024)),
+			UsedSpaceGB:  math.Round(float64(diskStat.Used) / (1024 * 1024 * 1024)),
+		}
+
+		di.Disks = append(di.Disks, diskInfo)
+	}
+
 	return di, nil
 }
 
 func (di *DiskInfo) GetHtml() string {
-	html := fmt.Sprintf(`
-	<table class="table table-dark table-striped">
-		<tr><td>Total</td><td>%v GB</td></tr>
-		<tr><td>Used</td><td>%v GB</td></tr>
-		<tr><td>Free</td><td>%v GB</td></tr>
-    </table>
-	`, di.TotalSpaceGB, di.UsedSpaceGB, di.FreeSpaceGB)
+	html := ""
+	for _, dsk := range di.Disks{
+		html += fmt.Sprintf(`
+		<div class="p-2"  style="max-height: 400px; max-width: 400px;">
+			<h4>%s</h4>
+			<table class="table table-dark table-striped">
+				<tr><td>Total</td><td>%v GB</td></tr>
+				<tr><td>Used</td><td>%v GB</td></tr>
+				<tr><td>Free</td><td>%v GB</td></tr>
+			</table>
+		</div>`,dsk.Path, dsk.TotalSpaceGB, dsk.UsedSpaceGB, dsk.FreeSpaceGB)
+	}
 
 	return html
 }
