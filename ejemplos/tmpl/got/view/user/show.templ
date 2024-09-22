@@ -1,0 +1,25 @@
+package user 
+
+import "tmplexample/view/layout"
+import "tmplexample/view/components"
+import "tmplexample/model"
+import "context"
+
+func getAuthenticatedUser(c context.Context) string {
+    user, ok := c.Value("user").(string)
+    if !ok {
+        return ""
+    }
+    return user
+}
+
+templ Show(user model.User) {
+    @layout.Base() {
+        <h1> {getAuthenticatedUser(ctx)} </h1>
+        <h1>Hello {user.Email} from the user page</h1>
+        @components.Input(components.InputProps{
+            Typ: "email",
+            Name: "email",
+        })
+    }
+}
