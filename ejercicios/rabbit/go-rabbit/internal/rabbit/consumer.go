@@ -91,3 +91,22 @@ func (c *Consumer) Listen(handler MessageHandler) error {
 	
 	return nil
 }
+
+func (c *Consumer) Consume() (<-chan amqp.Delivery, error){
+
+	messages, err := c.channel.Consume(
+		c.queueName, // cola
+		"",     // consumidor
+		true,   // auto-ack
+		false,  // exclusiva
+		false,  // no-local
+		false,  // sin esperar
+		nil,    // argumentos
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return messages, nil
+
+}
