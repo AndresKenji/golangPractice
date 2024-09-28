@@ -1,6 +1,6 @@
 module bookings
 
-go 1.22.0
+go 1.23.0
 
 require (
 	github.com/alexedwards/scs/v2 v2.8.0
@@ -13,6 +13,9 @@ require (
 
 require (
 	github.com/go-test/deep v1.1.1 // indirect
+	github.com/gofrs/uuid v4.2.0+incompatible // indirect
+	github.com/lib/pq v1.10.9 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/toorop/go-dkim v0.0.0-20201103131630-e1cd1a0a5208 // indirect
 )
 
