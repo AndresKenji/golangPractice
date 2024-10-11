@@ -1,9 +1,9 @@
 package dbrepo
 
 import (
-	"database/sql"
 	"bookings/internal/config"
 	"bookings/internal/repository"
+	"database/sql"
 )
 
 type postgresDBRepo struct {

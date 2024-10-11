@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"bookings/internal/models"
+	"fmt"
 	mail "github.com/xhit/go-simple-mail/v2"
 	"io/ioutil"
 	"log"

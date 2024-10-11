@@ -23,12 +23,11 @@ func New(data url.Values) *Form {
 	}
 }
 
-
 // Required checks for required fields
 func (f *Form) Required(fields ...string) {
 	for _, field := range fields {
 		value := f.Get(field)
-		if strings.TrimSpace(value) == ""{
+		if strings.TrimSpace(value) == "" {
 			f.Errors.Add(field, "This field cannot be blank")
 		}
 	}
@@ -60,8 +59,8 @@ func (f *Form) MinLength(field string, length int, r *http.Request) bool {
 }
 
 // IsEmail checks if email is correct
-func (f *Form) IsEmail(field string){
+func (f *Form) IsEmail(field string) {
 	if !govalidator.IsEmail(f.Get(field)) {
-		f.Errors.Add(field,"Invalid email address")
+		f.Errors.Add(field, "Invalid email address")
 	}
 }

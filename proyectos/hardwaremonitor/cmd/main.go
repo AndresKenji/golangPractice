@@ -43,10 +43,10 @@ func main() {
 
 			html := `
 			<strong hx-swap-oob="innerHTML:#update-timestamp">Last Update ` + timeStamp + `</strong>
-			<div hx-swap-oob="innerHTML:#system-value">`+systemSection.GetHtml()+`</div>
-			<div hx-swap-oob="innerHTML:#disk-value">`+diskSection.GetHtml()+`</div>
-			<div hx-swap-oob="innerHTML:#cpu-value">`+cpuSection.GetHtml()+`</div>
-			<div hx-swap-oob="innerHTML:#net-value">`+netSection.GetHtml()+`</div>
+			<div hx-swap-oob="innerHTML:#system-value">` + systemSection.GetHtml() + `</div>
+			<div hx-swap-oob="innerHTML:#disk-value">` + diskSection.GetHtml() + `</div>
+			<div hx-swap-oob="innerHTML:#cpu-value">` + cpuSection.GetHtml() + `</div>
+			<div hx-swap-oob="innerHTML:#net-value">` + netSection.GetHtml() + `</div>
 			`
 			s.Broadcast([]byte(html))
 
@@ -54,7 +54,7 @@ func main() {
 		}
 	}(srv)
 
-	err := http.ListenAndServe(":8080", &srv.Mux) 
+	err := http.ListenAndServe(":8080", &srv.Mux)
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 		os.Exit(1)

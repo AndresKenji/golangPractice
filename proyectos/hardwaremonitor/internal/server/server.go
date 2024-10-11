@@ -14,7 +14,7 @@ import (
 
 // content holds our static web server content.
 //go:embed html
-var indexHTML embed.FS 
+var indexHTML embed.FS
 
 type Server struct {
 	SubcriberMessageBuffer int
@@ -44,14 +44,14 @@ func NewServer() *Server {
 			return
 		}
 		defer file.Close()
-	
+
 		// Leemos el contenido del archivo
 		content, err := io.ReadAll(file)
 		if err != nil {
 			http.Error(w, "Failed to read file", http.StatusInternalServerError)
 			return
 		}
-	
+
 		// Escribimos el contenido en la respuesta HTTP
 		w.Write(content)
 	})

@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-
 type LogServer struct {
 	logs.UnimplementedLogServiceServer
 	Models data.Models
@@ -38,9 +37,9 @@ func (l *LogServer) WriteLog(ctx context.Context, req *logs.LogRequest) (*logs.L
 }
 
 func (app *Config) gRPCListen() {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s",gRpcPort))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", gRpcPort))
 	if err != nil {
-		log.Fatalf("Falla al escuchar gRPC: %v",err)
+		log.Fatalf("Falla al escuchar gRPC: %v", err)
 	}
 
 	s := grpc.NewServer()
@@ -50,6 +49,6 @@ func (app *Config) gRPCListen() {
 	log.Printf("gRPC server iniciado en puerto %s", gRpcPort)
 
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("Falla al escuchar gRPC: %v",err)
+		log.Fatalf("Falla al escuchar gRPC: %v", err)
 	}
 }

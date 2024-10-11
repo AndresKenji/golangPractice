@@ -37,12 +37,12 @@ func PrintEstadistica(palabra string) {
 	fmt.Printf("\t - %d minúsculas\n", sumas[mins])
 	fmt.Printf("\t - %d vocales\n", sumas[vocs])
 	fmt.Printf("\t - %d consonantes\n", sumas[cons])
-	if cd, ok := sumas[desc] ; ok && cd > 0 {
+	if cd, ok := sumas[desc]; ok && cd > 0 {
 		fmt.Printf("\t - %d carácteres desconocidos\n", sumas[desc])
 	}
 	fmt.Println("Histograma de letras:")
-	for c := 'A' ; c <= 'Z' ; c++ {
-		if n, ok := sumas[string(c)] ; ok {
+	for c := 'A'; c <= 'Z'; c++ {
+		if n, ok := sumas[string(c)]; ok {
 			fmt.Printf("\t%c : %d apariciones\n", c, n)
 		}
 	}
@@ -54,7 +54,7 @@ func calcula(palabra string) sumador.Claves {
 		if voc, ok := vocales[l]; ok {
 			sumas.Incrementa(vocs)
 			sumas.Incrementa(string(voc))
-			if _, ok := vocMayus[l] ; ok {
+			if _, ok := vocMayus[l]; ok {
 				sumas.Incrementa(mays)
 			} else {
 				sumas.Incrementa(mins)

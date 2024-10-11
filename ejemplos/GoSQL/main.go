@@ -4,10 +4,10 @@ package main
 // https://github.com/go-sql-driver/mysql
 import (
 	"fmt"
-	"log"
 	"kenji.gomysql/gomysql/database"
 	"kenji.gomysql/gomysql/handlers"
 	"kenji.gomysql/gomysql/models"
+	"log"
 )
 
 func main() {
@@ -43,8 +43,8 @@ func main() {
 			fmt.Scanln(&contactId)
 			contact := handlers.GetContactByID(db, contactId)
 			contact.EditContact()
-			handlers.UpdateContact(db,contact)
-			
+			handlers.UpdateContact(db, contact)
+
 		case 4:
 			handlers.ListContacts(db)
 			var contactId int
@@ -56,8 +56,6 @@ func main() {
 			continuar = false
 		}
 
-
 	}
-	
 
 }

@@ -1,9 +1,9 @@
 package dbrepo
 
 import (
+	"bookings/internal/models"
 	"context"
 	"errors"
-	"bookings/internal/models"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"

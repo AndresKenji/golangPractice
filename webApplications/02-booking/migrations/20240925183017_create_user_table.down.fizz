@@ -1,1 +1,1 @@
-sql("DRP TABLE IF EXISTS users")
+sql("DROP TABLE IF EXISTS users")

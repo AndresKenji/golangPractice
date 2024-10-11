@@ -1,11 +1,11 @@
 package handlers
 
 import (
+	"bookings/internal/driver"
+	"bookings/internal/models"
 	"context"
 	"encoding/json"
 	"fmt"
-	"bookings/internal/driver"
-	"bookings/internal/models"
 	"log"
 	"net/http"
 	"net/http/httptest"

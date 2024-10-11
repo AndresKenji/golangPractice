@@ -19,5 +19,5 @@ func (hs *Holaservicio) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	panic(http.ListenAndServe(":8000",&Holaservicio{}))
+	panic(http.ListenAndServe(":8000", &Holaservicio{}))
 }

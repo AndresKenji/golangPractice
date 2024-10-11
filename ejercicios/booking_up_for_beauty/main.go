@@ -17,7 +17,7 @@ func Schedule(date string) time.Time {
 
 // HasPassed returns whether a date has passed.
 func HasPassed(date string) bool {
-	haspassed := time.Now().Compare(Schedule(date)) 
+	haspassed := time.Now().Compare(Schedule(date))
 	if haspassed > 0 {
 		return false
 	}
@@ -42,12 +42,11 @@ func AnniversaryDate() time.Time {
 	panic("Please implement the AnniversaryDate function")
 }
 
-
 func main() {
-    appointmentDate := "7/13/2020 20:32:00"
-    appointmentTime := Schedule(appointmentDate)
-    fmt.Println("Appointment time:", appointmentTime.Format("2006-01-02 15:04"))
+	appointmentDate := "7/13/2020 20:32:00"
+	appointmentTime := Schedule(appointmentDate)
+	fmt.Println("Appointment time:", appointmentTime.Format("2006-01-02 15:04"))
 	fmt.Println(HasPassed("October 3, 2019 20:32:00"))
 
-	fmt.Println("validando si la fecha es futura",HasPassed("7/13/2020 20:32:00"))
+	fmt.Println("validando si la fecha es futura", HasPassed("7/13/2020 20:32:00"))
 }

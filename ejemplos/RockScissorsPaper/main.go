@@ -1,18 +1,15 @@
 package main
 
 import (
+	"kenji.rsp/rsp/handlers"
 	"log"
 	"net/http"
-	"kenji.rsp/rsp/handlers"
 )
-
-
-
 
 func main() {
 	// Objeto router para recibir rutas
 	router := http.NewServeMux()
-	// Manejo de archivos estaticos 
+	// Manejo de archivos estaticos
 	fs := http.FileServer(http.Dir("static"))
 	// Registrar la ruta para los archivos estaticos
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -23,7 +20,7 @@ func main() {
 	router.HandleFunc("/about", handlers.About)
 	router.HandleFunc("/play", handlers.Play)
 	port := ":8801"
-	log.Printf("Servidor escuchando en http://localhost:%v\n",port)
-	log.Fatal(http.ListenAndServe(port,router))
-	
+	log.Printf("Servidor escuchando en http://localhost:%v\n", port)
+	log.Fatal(http.ListenAndServe(port, router))
+
 }

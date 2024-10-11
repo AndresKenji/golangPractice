@@ -1,15 +1,15 @@
 package handlers
 
 import (
+	"bookings/internal/config"
+	"bookings/internal/models"
+	"bookings/internal/render"
 	"encoding/gob"
 	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/justinas/nosurf"
-	"bookings/internal/config"
-	"bookings/internal/models"
-	"bookings/internal/render"
 	"html/template"
 	"log"
 	"net/http"

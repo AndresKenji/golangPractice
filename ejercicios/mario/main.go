@@ -7,14 +7,13 @@ import (
 )
 
 func Escalera(altura int) {
-	for i := 1; i<= altura; i++{
-		for j := 1; j<= i; j++{
+	for i := 1; i <= altura; i++ {
+		for j := 1; j <= i; j++ {
 			fmt.Print("#")
 		}
 		fmt.Println()
 	}
 }
-
 
 func main() {
 

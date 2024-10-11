@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bookings/internal/config"
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"bookings/internal/config"
 	"testing"
 )
 

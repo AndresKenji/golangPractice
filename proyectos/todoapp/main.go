@@ -81,7 +81,7 @@ func main() {
 		tasks = task.CompleteTask(tasks, id)
 		task.SaveTasks(file, tasks)
 		task.ListTask(tasks)
-	
+
 	default:
 		printUsage()
 

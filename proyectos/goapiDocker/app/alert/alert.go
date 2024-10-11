@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-type SlackMsg struct{
-	Text string  `json:"text"`
-	Error bool	`json:"err"`
+type SlackMsg struct {
+	Text  string `json:"text"`
+	Error bool   `json:"err"`
 }
 
 func SlackNotification(msg *SlackMsg) (*http.Response, error) {
@@ -42,9 +42,8 @@ func SlackNotification(msg *SlackMsg) (*http.Response, error) {
 }
 
 type TeamsMsg struct {
-	Text string `json:"text"`
+	Text        string   `json:"text"`
 	Identifiers []string `json:"identifiers"`
-
 }
 
 func SendTeamsReport(msg *TeamsMsg) (*http.Response, error) {

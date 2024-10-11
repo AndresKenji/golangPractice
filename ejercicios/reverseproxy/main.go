@@ -36,7 +36,7 @@ func main() {
 	}
 
 	server := http.Server{
-		Addr: fmt.Sprintf(":%s",cfgFile.Port),
+		Addr:    fmt.Sprintf(":%s", cfgFile.Port),
 		Handler: mux,
 	}
 
@@ -55,33 +55,32 @@ func reverseProxy(target string) http.HandlerFunc {
 		r.URL.Scheme = url.Scheme
 		r.Header.Set("X-Forwarded-Host", r.Host)
 		r.Host = url.Host
-		proxy.ServeHTTP(w,r)
+		proxy.ServeHTTP(w, r)
 	}
 }
 
-
 func (c *Config) generateHandler() http.HandlerFunc {
-	log.Println("Creating Handler for ",c.Prefix)
+	log.Println("Creating Handler for ", c.Prefix)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		hi := r.Header.Get(c.HeaderIdentifier)
-		log.Println("Hit ",c.Prefix, hi)
+		log.Println("Hit ", c.Prefix, hi)
 		url, exist := c.BackendUrls[hi]
 		if exist {
-			reverseProxy(url).ServeHTTP(w,r)
-		}else {
+			reverseProxy(url).ServeHTTP(w, r)
+		} else {
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
 	}
 }
 
 type Config struct {
-	Prefix string `json:"prefix"`
-	HeaderIdentifier string `json:"header_identifier"`
-	BackendUrls  map[string]string  `json:"backend_urls"`
+	Prefix           string            `json:"prefix"`
+	HeaderIdentifier string            `json:"header_identifier"`
+	BackendUrls      map[string]string `json:"backend_urls"`
 }
 
 type ConfigFile struct {
-	Port string `json:"port"`
+	Port      string   `json:"port"`
 	Endpoints []Config `json:"endpoints"`
 }

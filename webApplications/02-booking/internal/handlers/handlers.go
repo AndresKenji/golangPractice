@@ -3,12 +3,12 @@ package handlers
 import (
 	"bookings/helpers"
 	"bookings/internal/config"
+	"bookings/internal/driver"
 	"bookings/internal/forms"
 	"bookings/internal/models"
 	"bookings/internal/render"
-	"bookings/internal/repository/dbrepo"
 	"bookings/internal/repository"
-	"bookings/internal/driver"
+	"bookings/internal/repository/dbrepo"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -157,7 +157,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	form := forms.New(r.PostForm)
 
 	form.Required("first_name", "last_name", "email")
-	form.MinLength("first_name", 3,r)
+	form.MinLength("first_name", 3, r)
 	form.IsEmail("email")
 
 	if !form.Valid() {

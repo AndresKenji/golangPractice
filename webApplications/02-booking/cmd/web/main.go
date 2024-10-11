@@ -19,8 +19,6 @@ import (
 	"github.com/alexedwards/scs/v2"
 )
 
-
-
 const portNumber = ":8080"
 
 var app config.AppConfig
@@ -64,9 +62,9 @@ func run() (*driver.DB, error) {
 	inProduction := flag.Bool("production", true, "Application is in production")
 	useCache := flag.Bool("cache", true, "Use template cache")
 	dbHost := flag.String("dbhost", "localhost", "Database host")
-	dbName := flag.String("dbname", "", "Database name")
-	dbUser := flag.String("dbuser", "", "Database user")
-	dbPass := flag.String("dbpass", "", "Database password")
+	dbName := flag.String("dbname", "goweb", "Database name")
+	dbUser := flag.String("dbuser", "", "Database user")//kenji
+	dbPass := flag.String("dbpass", "", "Database password")// 880106Postgres
 	dbPort := flag.String("dbport", "5432", "Database port")
 	dbSSL := flag.String("dbssl", "disable", "Database ssl settings (disable, prefer, require)")
 

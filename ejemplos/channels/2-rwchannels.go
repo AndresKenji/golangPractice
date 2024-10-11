@@ -14,7 +14,7 @@ func Emisor(ch chan<- int) {
 func Recerptor(ch <-chan int) {
 	for i := 1; i <= nums; i++ {
 		num := <-ch
-		fmt.Println("Recibido:",num)
+		fmt.Println("Recibido:", num)
 	}
 }
 

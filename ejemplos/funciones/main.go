@@ -7,17 +7,17 @@ func main() {
 	fmt.Println(factorial(8))
 
 	// Funciones anonimas
-	func (){
+	func() {
 		fmt.Println("Hola desde una función anonima")
 	}()
 
-	saludo := func(name string){
+	saludo := func(name string) {
 		fmt.Printf("Hola %s como te va ?\n", name)
 	}
 	saludo("Andres")
 
-
 }
+
 // Funcion variadica
 func suma(nums ...int) int {
 	fmt.Println("Total de parametros:", len(nums))
@@ -36,4 +36,3 @@ func factorial(n int) int {
 	fmt.Printf("%v x %v \n", n, n-1)
 	return n * factorial(n-1)
 }
-

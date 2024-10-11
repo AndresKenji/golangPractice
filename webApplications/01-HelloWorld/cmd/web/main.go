@@ -14,11 +14,9 @@ import (
 )
 
 const portNumber = ":8801"
+
 var app config.AppConfig
 var session *scs.SessionManager
-
-
-
 
 func main() {
 
@@ -33,7 +31,6 @@ func main() {
 	session.Cookie.Secure = app.InProduction
 
 	app.Session = session
-	
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
@@ -45,8 +42,6 @@ func main() {
 	handlers.NewHandlers(repo)
 	render.NewTemplates(&app)
 
-
-
 	// http.HandleFunc("/", repo.Home)
 	// http.HandleFunc("/about", repo.About)
 
@@ -54,7 +49,7 @@ func main() {
 	// _ = http.ListenAndServe(portNumber,nil)
 
 	srv := &http.Server{
-		Addr: portNumber,
+		Addr:    portNumber,
 		Handler: routes(&app),
 	}
 

@@ -1,10 +1,10 @@
 package render
 
 import (
-	"encoding/gob"
-	"github.com/alexedwards/scs/v2"
 	"bookings/internal/config"
 	"bookings/internal/models"
+	"encoding/gob"
+	"github.com/alexedwards/scs/v2"
 	"log"
 	"net/http"
 	"os"

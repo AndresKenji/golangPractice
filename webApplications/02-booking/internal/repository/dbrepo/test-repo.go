@@ -1,8 +1,8 @@
 package dbrepo
 
 import (
-	"errors"
 	"bookings/internal/models"
+	"errors"
 	"log"
 	"time"
 )
@@ -158,7 +158,7 @@ func (m *testDBRepo) UpdateProcessedForReservation(id, processed int) error {
 
 func (m *testDBRepo) AllRooms() ([]models.Room, error) {
 	var rooms []models.Room
-	rooms = append(rooms, models.Room{ID:1})
+	rooms = append(rooms, models.Room{ID: 1})
 	return rooms, nil
 }
 
@@ -178,7 +178,7 @@ func (m *testDBRepo) GetRestrictionsForRoomByDate(roomID int, start, end time.Ti
 	// add a reservation
 	restrictions = append(restrictions, models.RoomRestriction{
 		ID:            2,
-		StartDate:     time.Now().AddDate(0,0,2),
+		StartDate:     time.Now().AddDate(0, 0, 2),
 		EndDate:       time.Now().AddDate(0, 0, 3),
 		RoomID:        1,
 		ReservationID: 1,

@@ -23,7 +23,6 @@ type SystemInfo struct {
 
 type NetInfo struct {
 	Interfaces []net.InterfaceStat
-
 }
 
 func GetNetSection() (*NetInfo, error) {
@@ -96,7 +95,7 @@ func GetCpuSection() (*CpuInfo, error) {
 }
 
 type Disk struct {
-	Path string
+	Path         string
 	TotalSpaceGB float64
 	UsedSpaceGB  float64
 	FreeSpaceGB  float64
@@ -110,20 +109,20 @@ func GetDiskSection() (*DiskInfo, error) {
 	di := &DiskInfo{
 		Disks: []*Disk{},
 	}
-	
+
 	partitions, err := disk.Partitions(false)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	for _, dsk := range partitions {
 		diskStat, err := disk.Usage(dsk.Mountpoint)
 		if err != nil {
 			return nil, err
 		}
-				
+
 		diskInfo := &Disk{
-			Path: diskStat.Path,
+			Path:         diskStat.Path,
 			TotalSpaceGB: math.Round(float64(diskStat.Total) / (1024 * 1024 * 1024)),
 			FreeSpaceGB:  math.Round(float64(diskStat.Free) / (1024 * 1024 * 1024)),
 			UsedSpaceGB:  math.Round(float64(diskStat.Used) / (1024 * 1024 * 1024)),
@@ -137,7 +136,7 @@ func GetDiskSection() (*DiskInfo, error) {
 
 func (di *DiskInfo) GetHtml() string {
 	html := ""
-	for _, dsk := range di.Disks{
+	for _, dsk := range di.Disks {
 		html += fmt.Sprintf(`
 		<div class="card text-bg-dark m-2 " style="width: 18rem;">
 			<div class="card-header">
@@ -149,7 +148,7 @@ func (di *DiskInfo) GetHtml() string {
 				<li class="list-group-item list-group-item-dark">Free %v GB</li>
 			</ul>
 		</div>
-		`,dsk.Path, dsk.TotalSpaceGB, dsk.UsedSpaceGB, dsk.FreeSpaceGB)
+		`, dsk.Path, dsk.TotalSpaceGB, dsk.UsedSpaceGB, dsk.FreeSpaceGB)
 	}
 
 	return html
@@ -163,7 +162,7 @@ func (ci *CpuInfo) GetHtml() string {
 		<tr><td>Logical Cores</td><td>%d</td></tr>
 		<tr><td>Use Percent</td><td>%v%%</td></tr>
 	</table>
-	`,ci.CPU, ci.Cores, ci.LogicalCores, ci.Percent)
+	`, ci.CPU, ci.Cores, ci.LogicalCores, ci.Percent)
 
 	return html
 }
@@ -178,7 +177,7 @@ func (si *SystemInfo) GetHtml() string {
 		<tr><td>Platform</td><td>%s</td></tr>
 		<tr><td>Uptime</td><td>%d seg</td></tr>
 	</table>
-	`,si.Hostname, si.MemoryMB, si.FreeMemoryMB, si.Os, si.Platform, si.Uptime)
+	`, si.Hostname, si.MemoryMB, si.FreeMemoryMB, si.Os, si.Platform, si.Uptime)
 
 	return html
 
@@ -186,7 +185,7 @@ func (si *SystemInfo) GetHtml() string {
 
 func (ni *NetInfo) GetHtml() string {
 	html := ""
-	for _, itf := range ni.Interfaces{
+	for _, itf := range ni.Interfaces {
 		html += fmt.Sprintf(`
 		<div class="card text-bg-dark m-2 " style="width: 18rem;">
 			<div class="card-header">
@@ -198,7 +197,7 @@ func (ni *NetInfo) GetHtml() string {
 				<li class="list-group-item list-group-item-dark">MTU %d</li>
 			</ul>
 		</div>
-		`,itf.Name, itf.Addrs[0].Addr, itf.HardwareAddr,itf.MTU) 
+		`, itf.Name, itf.Addrs[0].Addr, itf.HardwareAddr, itf.MTU)
 	}
 
 	return html

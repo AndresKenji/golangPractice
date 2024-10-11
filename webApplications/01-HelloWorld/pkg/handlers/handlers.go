@@ -7,7 +7,6 @@ import (
 	"net/http"
 )
 
-
 var Repo *Repository
 
 type Repository struct {
@@ -40,7 +39,7 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	stringMap["test"] = "Hello, again"
 
 	remoteIP := m.App.Session.GetString(r.Context(), "remote_ip")
-	
+
 	stringMap["remote_ip"] = remoteIP
 
 	// send data to template

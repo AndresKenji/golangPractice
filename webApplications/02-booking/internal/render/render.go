@@ -15,7 +15,6 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-
 var functions = template.FuncMap{
 	"humanDate":  HumanDate,
 	"formatDate": FormatDate,

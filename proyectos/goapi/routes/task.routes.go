@@ -9,16 +9,16 @@ import (
 	"kenji.goapi/goapi/models"
 )
 
-func GetTasksHandler(w http.ResponseWriter, r *http.Request ){
+func GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 	var tasks []models.Task
 	db.DB.Find(&tasks)
 	json.NewEncoder(w).Encode(&tasks)
 }
 
-func GetTaskHandler(w http.ResponseWriter, r *http.Request ){
+func GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	id := mux.Vars(r)["id"]
-	db.DB.First(&task,id)
+	db.DB.First(&task, id)
 	if task.ID == 0 {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("Task not found"))
@@ -27,7 +27,7 @@ func GetTaskHandler(w http.ResponseWriter, r *http.Request ){
 	json.NewEncoder(w).Encode(&task)
 }
 
-func PostTasksHandler(w http.ResponseWriter, r *http.Request ){
+func PostTasksHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	json.NewDecoder(r.Body).Decode(&task)
 	createdTask := db.DB.Create(&task)
@@ -36,16 +36,16 @@ func PostTasksHandler(w http.ResponseWriter, r *http.Request ){
 		w.WriteHeader(http.StatusBadRequest) // 400
 		w.Write([]byte(err.Error()))
 		return
-	} 
+	}
 
 	json.NewEncoder(w).Encode(&task)
-	
+
 }
 
-func DeleteTaskHandler(w http.ResponseWriter, r *http.Request ){
+func DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	id := mux.Vars(r)["id"]
-	db.DB.First(&task,id)
+	db.DB.First(&task, id)
 	if task.ID == 0 {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("Task not found"))

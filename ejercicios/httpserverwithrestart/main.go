@@ -13,7 +13,7 @@ type server struct {
 	restartChan chan bool
 }
 
-func newServer(context context.Context, restar chan bool) *server{
+func newServer(context context.Context, restar chan bool) *server {
 	log.Println("Creating server")
 	server := &server{}
 	server.Context = context
@@ -28,7 +28,7 @@ func (s *server) setRoutes() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello from api!"))
 	})
-	mux.HandleFunc("/restart",func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/restart", func(w http.ResponseWriter, r *http.Request) {
 		s.restartChan <- true
 		w.Write([]byte("Restart signal sent"))
 	})
@@ -38,7 +38,7 @@ func (s *server) setRoutes() {
 
 func (s *server) startServer() error {
 	srv := &http.Server{
-		Addr: ":"+ s.port,
+		Addr:    ":" + s.port,
 		Handler: s.Mux,
 	}
 	go func() {
@@ -75,10 +75,10 @@ func main() {
 		}()
 
 		select {
-		case <- checkForRestart:
+		case <-checkForRestart:
 			log.Println("restarting server...")
 			cancel()
-		case <- ctx.Done():
+		case <-ctx.Done():
 			log.Println("Context canceled, shutting down the server...")
 			return
 		}

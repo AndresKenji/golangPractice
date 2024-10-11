@@ -34,5 +34,3 @@ func main() {
 	server := NewAPIserver("localhost:8801")
 	server.Run()
 }
-
-

@@ -10,7 +10,7 @@ import (
 type UserHandler struct{}
 
 func (h UserHandler) HandleUserShow(c echo.Context) error {
-	use := model.User {
+	use := model.User{
 		Email: "andres.kenji@outlook.com",
 	}
 

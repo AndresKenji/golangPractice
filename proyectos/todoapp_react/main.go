@@ -14,10 +14,10 @@ func main() {
 	db.DB.AutoMigrate(models.Task{})
 	db.DB.AutoMigrate(models.User{})
 
-
 	// Creando el servidor para la Api
 	server := api.NewApiServer("localhost:8801")
-	err := 	server.Run(); if err != nil {
+	err := server.Run()
+	if err != nil {
 		log.Panicln(err)
 	}
 

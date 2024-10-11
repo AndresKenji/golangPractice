@@ -35,6 +35,5 @@ func main() {
 		return
 	}
 	fmt.Print(entries)
-	
 
 }

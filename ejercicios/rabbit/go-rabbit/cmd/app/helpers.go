@@ -6,7 +6,7 @@ import (
 
 type Message struct {
 	Name string `json:"name"`
-	Msg string `json:"msg"`
+	Msg  string `json:"msg"`
 }
 
 func failOnError(err error, msg string) {
@@ -20,4 +20,3 @@ func logOnError(err error, msg string) {
 		log.Printf("%s: %s", msg, err)
 	}
 }
-

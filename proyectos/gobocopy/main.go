@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"sync"
-	"os/signal"
 	"syscall"
 )
 
-var wg  sync.WaitGroup
-
+var wg sync.WaitGroup
 
 func copyFile(src, dst string, wg *sync.WaitGroup) {
 	defer wg.Done()

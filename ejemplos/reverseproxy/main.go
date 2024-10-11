@@ -29,17 +29,16 @@ func main() {
 			fmt.Fprintf(w, err.Error())
 			return
 		}
-		for key, values := range response.Header{
+		for key, values := range response.Header {
 			for _, value := range values {
-				w.Header().Set(key,value)
+				w.Header().Set(key, value)
 			}
 		}
 
 		w.WriteHeader(response.StatusCode)
 		io.Copy(w, response.Body)
 
-
 	})
 	log.Println("Listening on port 8080")
-	http.ListenAndServe(":8080",proxy)
+	http.ListenAndServe(":8080", proxy)
 }
