@@ -7,11 +7,10 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-
-
 func messageHandle(data amqp.Delivery, qname string) error {
 	var message Message
-	err := json.Unmarshal(data.Body, &message); if err != nil {
+	err := json.Unmarshal(data.Body, &message)
+	if err != nil {
 		return err
 	}
 	switch qname {
@@ -28,11 +27,7 @@ func messageHandle(data amqp.Delivery, qname string) error {
 
 		log.Printf("Se ha presentado un error con el usuario %s \nError: %s", message.Name, message.Msg)
 
-	
 	}
-
 
 	return nil
 }
-
-

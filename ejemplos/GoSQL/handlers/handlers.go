@@ -12,7 +12,7 @@ import (
 func ListContacts(db *sql.DB) {
 	// Realizar consulta mediante querys
 	query := "SELECT * FROM contact"
-	
+
 	// Ejecutar consulta
 	rows, err := db.Query(query)
 	if err != nil {
@@ -20,21 +20,21 @@ func ListContacts(db *sql.DB) {
 	}
 	defer rows.Close()
 
-	// Iterar sobre las rows 
+	// Iterar sobre las rows
 	fmt.Println("Lista de contactos")
 	fmt.Println("--------------------------------------------------")
-	
-	for rows.Next(){
+
+	for rows.Next() {
 		// Instancia el modelo contact
 		contact := models.Contact{}
 		var valueEmail sql.NullString
-		err := rows.Scan(&contact.Id,&contact.Name,&valueEmail,&contact.Phone)
+		err := rows.Scan(&contact.Id, &contact.Name, &valueEmail, &contact.Phone)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if valueEmail.Valid{
+		if valueEmail.Valid {
 			contact.Email = valueEmail.String
-		}else{
+		} else {
 			contact.Email = "Sin correo"
 		}
 
@@ -45,27 +45,25 @@ func ListContacts(db *sql.DB) {
 	fmt.Println("--------------------------------------------------")
 }
 
-
-
-func GetContactByID(db *sql.DB, id int) models.Contact{
+func GetContactByID(db *sql.DB, id int) models.Contact {
 	// Realizar consulta mediante querys
 	query := "SELECT * FROM contact WHERE id = ?"
-	
+
 	// Ejecutar consulta
 	row := db.QueryRow(query, id)
-	
+
 	contact := models.Contact{}
 	var valueEmail sql.NullString
-	err := row.Scan(&contact.Id,&contact.Name,&valueEmail,&contact.Phone)
+	err := row.Scan(&contact.Id, &contact.Name, &valueEmail, &contact.Phone)
 	if err != nil {
-		if err == sql.ErrNoRows{
+		if err == sql.ErrNoRows {
 			log.Fatalf("No se encontro ningun contacto con el ID %d", id)
 		}
 		log.Fatal(err)
 	}
-	if valueEmail.Valid{
+	if valueEmail.Valid {
 		contact.Email = valueEmail.String
-	}else{
+	} else {
 		contact.Email = "Sin correo"
 	}
 	fmt.Println("Contacto")
@@ -77,8 +75,7 @@ func GetContactByID(db *sql.DB, id int) models.Contact{
 	return contact
 }
 
-
-func CreateContact(db *sql.DB, newContact models.Contact){
+func CreateContact(db *sql.DB, newContact models.Contact) {
 	query := "INSERT INTO contact (name,email,phone) VALUES (?, ?, ?)"
 
 	_, err := db.Exec(query, newContact.Name, newContact.Email, newContact.Phone)
@@ -88,7 +85,7 @@ func CreateContact(db *sql.DB, newContact models.Contact){
 	log.Println("Se ha registrado un contacto nuevo!")
 }
 
-func UpdateContact(db *sql.DB, newContact models.Contact){
+func UpdateContact(db *sql.DB, newContact models.Contact) {
 	query := "UPDATE contact SET name = ?, email = ?, phone = ? WHERE id = ?"
 
 	_, err := db.Exec(query, newContact.Name, newContact.Email, newContact.Phone, newContact.Id)
@@ -98,8 +95,7 @@ func UpdateContact(db *sql.DB, newContact models.Contact){
 	log.Println("Se ha registrado un contacto nuevo!")
 }
 
-
-func DeleteContact(db *sql.DB, id int){
+func DeleteContact(db *sql.DB, id int) {
 	query := "DELETE FROM contact WHERE Id = ?"
 
 	_, err := db.Exec(query, id)

@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SendTeamsReport(htmlReport string, identifiers  []string) (*http.Response, error) {
+func SendTeamsReport(htmlReport string, identifiers []string) (*http.Response, error) {
 	url := "https://nfgw.ifxcorp.com/api/Msg/TeamsSendChatMessage"
 	// Crear un mapa que contiene el contenido del mensaje a enviar
 	data := map[string]interface{}{
@@ -44,9 +44,9 @@ func SendTeamsReport(htmlReport string, identifiers  []string) (*http.Response, 
 }
 
 func main() {
-	
+
 	identifiers := []string{"19:38a33eec37364c4a8cb26725630698a1@thread.v2"}
-	resp, err :=SendTeamsReport("<html><body><h1>Hello, Teams!</h1></body></html>", identifiers)
+	resp, err := SendTeamsReport("<html><body><h1>Hello, Teams!</h1></body></html>", identifiers)
 	if err != nil {
 		panic(err)
 	}

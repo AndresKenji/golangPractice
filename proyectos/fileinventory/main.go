@@ -36,7 +36,7 @@ func main() {
 
 	for _, entry := range entries {
 		sourcePath := filepath.Join(src, entry.Name())
-		if entry.IsDir(){
+		if entry.IsDir() {
 			GetDirFiles(sourcePath, &archivos)
 		} else {
 			archivos = append(archivos, sourcePath)
@@ -46,20 +46,20 @@ func main() {
 
 }
 
-func GetDirFiles(src string, archivos *[]string)  {
+func GetDirFiles(src string, archivos *[]string) {
 	var dirFiles = []string{}
 	dirEntries, err := os.ReadDir(src)
-	fmt.Println("Obteniendo archivos del directorio:",src)
+	fmt.Println("Obteniendo archivos del directorio:", src)
 	if err != nil {
-		fmt.Println("Error al leer el directorio",err)
-		return 
+		fmt.Println("Error al leer el directorio", err)
+		return
 	}
 	for _, entry := range dirEntries {
 		if !entry.IsDir() {
 			dirFiles = append(dirFiles, entry.Name())
-		}else {
+		} else {
 			fmt.Println("Redireccionando a una nueva carpeta")
 		}
 	}
-	return 	
+	return
 }

@@ -3,10 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"os"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"log"
+	"os"
 )
 
 func Connect() (*sql.DB, error) {

@@ -26,11 +26,9 @@ func main() {
 		go checkAPI(api, ch)
 	}
 
-	for i := 0; i< len(apis); i++ {
-		fmt.Println(<- ch)
+	for i := 0; i < len(apis); i++ {
+		fmt.Println(<-ch)
 	}
-
-
 
 	//time.Sleep(5 * time.Second)
 

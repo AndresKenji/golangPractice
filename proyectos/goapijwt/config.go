@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	DBUser   	string
-	DBPassword 	string
-	DBAddress   string
-	DBName 		string
-	JWTSecret   string
+	DBUser     string
+	DBPassword string
+	DBAddress  string
+	DBName     string
+	JWTSecret  string
 }
 
 var Envs = initConfig()

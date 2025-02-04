@@ -13,14 +13,14 @@ type Producer struct {
 }
 
 func NewProducer() (Producer, error) {
-	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s",os.Getenv("rb_user"),os.Getenv("rb_pwd"),os.Getenv("rb_ip"))
+	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s", os.Getenv("rb_user"), os.Getenv("rb_pwd"), os.Getenv("rb_ip"))
 
 	connection, err := Connect(rabbitMQURL)
 	if err != nil {
-		return Producer{} , err
+		return Producer{}, err
 	}
 
-	producer := Producer {
+	producer := Producer{
 		conn: connection,
 	}
 
@@ -28,7 +28,7 @@ func NewProducer() (Producer, error) {
 
 }
 
-func (p *Producer) Push(message []byte, exchange string) error{
+func (p *Producer) Push(message []byte, exchange string) error {
 	channel, err := p.conn.Channel()
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (p *Producer) Push(message []byte, exchange string) error{
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body: message,
+			Body:        message,
 		},
 	)
 	if err != nil {
@@ -51,7 +51,7 @@ func (p *Producer) Push(message []byte, exchange string) error{
 	return nil
 }
 
-func (p *Producer) CloseConn(){
+func (p *Producer) CloseConn() {
 	p.conn.Close()
 }
 
@@ -61,17 +61,17 @@ func (p *Producer) BindQueues(exchange string, queues []string) error {
 		return err
 	}
 	defer channel.Close()
-	err = DeclareExchange(channel,exchange, "fanout")
+	err = DeclareExchange(channel, exchange, "fanout")
 	if err != nil {
 		return err
 	}
 	for _, queue := range queues {
 		// Creamos una cola a la cual enviaremos el mensaje. (Si ya existe no pasa nada 😎)
-		q, err := DeclareQueue(channel,queue)
+		q, err := DeclareQueue(channel, queue)
 		if err != nil {
 			return err
 		}
-		log.Printf("Vinculando cola %s al exchange %s",queue, exchange)
+		log.Printf("Vinculando cola %s al exchange %s", queue, exchange)
 		err = channel.QueueBind(
 			q.Name,
 			"",

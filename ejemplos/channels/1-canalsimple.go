@@ -8,5 +8,5 @@ func main() {
 		ch <- "hola mundo enviado a un canal"
 	}()
 	recibido := <-ch
-	fmt.Println("Se ha recibido:",recibido)
+	fmt.Println("Se ha recibido:", recibido)
 }

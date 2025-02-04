@@ -20,11 +20,9 @@ func main() {
 	dulces <- "Brownie"
 	time.Sleep(time.Second)
 
-
-
 }
 func Engullidor(nombre string, dulces <-chan string) {
 	for dulce := range dulces {
-		fmt.Println(nombre,"come",dulce)
+		fmt.Println(nombre, "come", dulce)
 	}
 }

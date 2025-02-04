@@ -24,7 +24,7 @@ func main() {
 	// Acá nos conectamos a RabbitMQ o mostramos un mensaje de error en caso que ocurra.
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Falla al conectar con RabbitMQ")
-	defer conn.Close() 
+	defer conn.Close()
 
 	ch, err := conn.Channel()
 	failOnError(err, "Falla al abrir el canal")

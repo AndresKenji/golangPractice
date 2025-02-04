@@ -35,7 +35,7 @@ func main() {
 	msgs, err := ch.Consume(
 		q.Name, // cola
 		"",     // consumidor
-		true,   // auto-ack 
+		true,   // auto-ack
 		false,  // exclusiva
 		false,  // no-local
 		false,  // sin esperar

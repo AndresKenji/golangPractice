@@ -13,13 +13,13 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var users []models.User
 	db.DB.Find(&users)
 	json.NewEncoder(w).Encode(&users)
-	
+
 }
 
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var user models.User
-	db.DB.First(&user,id)
+	db.DB.First(&user, id)
 	if user.ID == 0 {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("User not found"))
@@ -48,7 +48,7 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var user models.User
-	db.DB.First(&user,id)
+	db.DB.First(&user, id)
 	if user.ID == 0 {
 		w.WriteHeader(http.StatusNotFound) // 404
 		w.Write([]byte("User not found"))

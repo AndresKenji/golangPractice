@@ -38,27 +38,25 @@ func Connect(url string) (*amqp.Connection, error) {
 	return connection, nil
 }
 
-
 func DeclareExchange(ch *amqp.Channel, name, _type string) error {
 	return ch.ExchangeDeclare(
-		name, // name ?
-		_type,      // type ?
-		true,         // durable ?
-		false,        // auto-delete ?
-		false,        // is internal ?
-		false,        // no-wait
-		nil,          // arguments =
+		name,  // name ?
+		_type, // type ?
+		true,  // durable ?
+		false, // auto-delete ?
+		false, // is internal ?
+		false, // no-wait
+		nil,   // arguments =
 	)
 }
 
-func DeclareQueue(ch *amqp.Channel,name string) (amqp.Queue, error) {
+func DeclareQueue(ch *amqp.Channel, name string) (amqp.Queue, error) {
 	return ch.QueueDeclare(
-		name,    // name
-		true, // durable
+		name,  // name
+		true,  // durable
 		false, // delete when unused
-		false,  // exclusive
+		false, // exclusive
 		false, // no wait
 		nil,   // arguments
 	)
 }
-

@@ -8,6 +8,7 @@ func PrintList(list ...any) {
 		fmt.Printf("Variable de tipo %T con valor %v \n", value, value)
 	}
 }
+
 // https://pkg.go.dev/golang.org/x/exp/constraints
 
 type Numbers interface {
@@ -32,8 +33,7 @@ func Suma[T Numbers](nums ...T) T {
 
 func main() {
 	PrintList("Andres", 36, 6.5, true)
-	fmt.Println(Suma(4,7,2,5))
-	fmt.Println(Suma(46.8,1.7,34.2,14.5))
-
+	fmt.Println(Suma(4, 7, 2, 5))
+	fmt.Println(Suma(46.8, 1.7, 34.2, 14.5))
 
 }

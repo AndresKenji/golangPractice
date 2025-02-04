@@ -17,7 +17,7 @@ type Contact struct {
 func saveContactsToFile(contacts []Contact) error {
 	file, err := os.Create("contacts.json")
 	defer file.Close()
-	
+
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(contacts)
 	if err != nil {
@@ -41,14 +41,12 @@ func loadContactsFromFile(contacts *[]Contact) error {
 	return nil
 }
 
-
-
 func main() {
 
 	var contacts []Contact
 	err := loadContactsFromFile(&contacts)
 	if err != nil {
-		fmt.Println("Error al cargar los contactos",err)
+		fmt.Println("Error al cargar los contactos", err)
 	}
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -67,7 +65,7 @@ Elige una opción: `)
 			fmt.Println("Error al leer la opción")
 			return
 		}
-		switch option{
+		switch option {
 		case 1:
 			var c Contact
 			fmt.Print("Nombre: ")
@@ -85,9 +83,9 @@ Elige una opción: `)
 			}
 		case 2:
 			fmt.Println("======================================")
-			for index, contact := range contacts{
+			for index, contact := range contacts {
 				fmt.Printf("%d, Nombre: %s Email: %s Telefono: %s \n",
-			                index, contact.Name,contact.Email, contact.Phone)
+					index, contact.Name, contact.Email, contact.Phone)
 			}
 			fmt.Println("======================================")
 		case 3:

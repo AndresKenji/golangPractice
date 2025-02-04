@@ -6,9 +6,7 @@ import (
 	"net/http"
 )
 
-
-
-func SendTeamsMsgHandler(w http.ResponseWriter, r *http.Request){
+func SendTeamsMsgHandler(w http.ResponseWriter, r *http.Request) {
 	var body alert.TeamsMsg
 	json.NewDecoder(r.Body).Decode(&body)
 	response, err := alert.SendTeamsReport(&body)
@@ -20,10 +18,10 @@ func SendTeamsMsgHandler(w http.ResponseWriter, r *http.Request){
 	if response.Status == "200 OK" {
 		w.Write([]byte("Alerta enviada con exito"))
 	}
-	
+
 }
 
-func SendSlackMsgHandler(w http.ResponseWriter, r *http.Request){
+func SendSlackMsgHandler(w http.ResponseWriter, r *http.Request) {
 	var body alert.SlackMsg
 	json.NewDecoder(r.Body).Decode(&body)
 	response, err := alert.SlackNotification(&body)

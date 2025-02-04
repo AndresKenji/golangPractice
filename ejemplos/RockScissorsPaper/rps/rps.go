@@ -3,7 +3,6 @@ package rps
 import (
 	"math/rand"
 	"strconv"
-
 )
 
 const (
@@ -68,23 +67,23 @@ func PlayRound(playerValue int) Round {
 	if playerValue == computerValue {
 		roundResult = "Es un empate"
 		message = drawMessages[messageInt]
-	}else if playerValue == (computerValue+1)%3 {
-		PlayerScore ++
+	} else if playerValue == (computerValue+1)%3 {
+		PlayerScore++
 		roundResult = "El jugador gana"
 		message = winMessages[messageInt]
 
-	}else {
-		ComputerScore ++
+	} else {
+		ComputerScore++
 		roundResult = "El jugador pierde"
 		message = loseMessages[messageInt]
 	}
 
 	return Round{
-		Message: message,
-		ComputerChoice: computerChoice,
-		RoundResult: roundResult,
+		Message:           message,
+		ComputerChoice:    computerChoice,
+		RoundResult:       roundResult,
 		ComputerChoiceInt: computerChoiceInt,
-		ComputerScore: strconv.Itoa(ComputerScore),
-		PlayerScore: strconv.Itoa(PlayerScore),
+		ComputerScore:     strconv.Itoa(ComputerScore),
+		PlayerScore:       strconv.Itoa(PlayerScore),
 	}
 }

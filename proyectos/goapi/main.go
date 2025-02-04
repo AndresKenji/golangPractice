@@ -10,15 +10,12 @@ import (
 	"kenji.goapi/goapi/routes"
 )
 
-
-
-
 func main() {
 
 	db.DBConnection()
 	db.DB.AutoMigrate(models.Task{})
 	db.DB.AutoMigrate(models.User{})
-	
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", routes.HomeHandler)
@@ -34,6 +31,6 @@ func main() {
 	router.HandleFunc("/tasks", routes.PostTasksHandler).Methods("POST")
 	router.HandleFunc("/tasks/{id}", routes.DeleteTaskHandler).Methods("DELETE")
 
-	http.ListenAndServe(":8800",router)
+	http.ListenAndServe(":8800", router)
 
 }

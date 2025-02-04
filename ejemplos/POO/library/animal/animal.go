@@ -22,6 +22,6 @@ func (g *Gato) Sonido() {
 	fmt.Println(g.Nombre + " Miau Miau")
 }
 
-func HacerSonido(animal Animal){
+func HacerSonido(animal Animal) {
 	animal.Sonido()
 }

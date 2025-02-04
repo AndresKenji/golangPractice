@@ -17,31 +17,31 @@ type ListaTareas struct {
 	tareas []Tarea
 }
 
-func (l *ListaTareas ) agregarTarea(t Tarea){
+func (l *ListaTareas) agregarTarea(t Tarea) {
 	l.tareas = append(l.tareas, t)
 }
-func (l *ListaTareas ) completarTarea(index int){
+func (l *ListaTareas) completarTarea(index int) {
 	l.tareas[index].Finalizado = true
 }
-func (l *ListaTareas ) editarTarea(index int, t Tarea){
+func (l *ListaTareas) editarTarea(index int, t Tarea) {
 	l.tareas[index] = t
 }
-func (l *ListaTareas ) eliminarTarea(index int){
-	l.tareas = append(l.tareas[:index],l.tareas[index+1:]...)
+func (l *ListaTareas) eliminarTarea(index int) {
+	l.tareas = append(l.tareas[:index], l.tareas[index+1:]...)
 }
-func (t *ListaTareas ) listarTareas(){
-	for i, tarea := range t.tareas{
-		fmt.Printf("%v) %s: %s Finalizado: %t \n",i, tarea.Nombre, tarea.Detalle, tarea.Finalizado)
+func (t *ListaTareas) listarTareas() {
+	for i, tarea := range t.tareas {
+		fmt.Printf("%v) %s: %s Finalizado: %t \n", i, tarea.Nombre, tarea.Detalle, tarea.Finalizado)
 	}
 }
 
 var reader = bufio.NewReader(os.Stdin)
-func leerEntrada() string {
-    entrada, _ := reader.ReadString('\n')
-	entrada = strings.TrimSpace(entrada)
-    return entrada
-}
 
+func leerEntrada() string {
+	entrada, _ := reader.ReadString('\n')
+	entrada = strings.TrimSpace(entrada)
+	return entrada
+}
 
 func main() {
 	misTareas := ListaTareas{}
@@ -78,18 +78,17 @@ func main() {
 			var indice int
 			fmt.Print("Tarea:")
 			fmt.Scan(&indice)
-			misTareas.completarTarea(indice)			
+			misTareas.completarTarea(indice)
 		case 4:
 			var indice int
 			fmt.Print("Tarea:")
 			fmt.Scan(&indice)
-			misTareas.eliminarTarea(indice)					
+			misTareas.eliminarTarea(indice)
 		case 5:
 			continuar = false
 
 		}
 
 	}
-
 
 }

@@ -70,6 +70,6 @@ func main() {
 	pruducto1 := Product[uint]{1, "Zapatos", 35}
 	pruducto2 := Product[string]{"DRG-ATVVSFD-SDWRFC", "Zapatos", 35}
 
-	fmt.Println(pruducto1,pruducto2)
+	fmt.Println(pruducto1, pruducto2)
 
 }

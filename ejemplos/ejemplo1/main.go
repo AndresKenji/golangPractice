@@ -5,8 +5,8 @@ import (
 
 	"github.com/mariomac/analizador"
 	"kenji.info/mimodulo/mimodulo/hola"
-	
 )
+
 func main() {
 	fmt.Print("¿Cómo te llamas?: ")
 	var nombre string
