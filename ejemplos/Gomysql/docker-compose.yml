@@ -1,0 +1,28 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: db
+    restart: no
+    environment:
+      MYSQL_ROOT_PASSWORD: sqladmin
+      MYSQL_DATABASE: golang
+      MYSQL_USER: kenji
+      MYSQL_PASSWORD: admin
+    ports:
+      - "6033:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    restart: no
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - 8081:80
+volumes:
+  dbdata:
