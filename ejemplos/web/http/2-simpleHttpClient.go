@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -23,7 +23,7 @@ func main() {
 
 	fmt.Println("Codigo de respuesta:", resp.StatusCode)
 	fmt.Println("Content-Type", resp.Header["Content-Type"])
-	cuerpo, err := ioutil.ReadAll(resp.Body)
+	cuerpo, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
