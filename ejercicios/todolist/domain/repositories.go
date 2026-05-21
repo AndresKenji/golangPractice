@@ -1,10 +1,9 @@
 package domain
 
 type TaskRepository interface {
-	CreateTask(task *Task) error
 	GetTaskByName(name string) (*Task, error)
 	UpdateTask(task *Task) error
-	SaveTask(task *Task) error
+	SaveTasks(task *Task) error
 	DeleteTask(name string) error
 	ListTasks() ([]*Task, error)
 }
