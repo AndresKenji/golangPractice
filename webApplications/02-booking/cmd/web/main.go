@@ -63,8 +63,8 @@ func run() (*driver.DB, error) {
 	useCache := flag.Bool("cache", true, "Use template cache")
 	dbHost := flag.String("dbhost", "localhost", "Database host")
 	dbName := flag.String("dbname", "goweb", "Database name")
-	dbUser := flag.String("dbuser", "", "Database user")//kenji
-	dbPass := flag.String("dbpass", "", "Database password")// 880106Postgres
+	dbUser := flag.String("dbuser", "", "Database user")     //kenji
+	dbPass := flag.String("dbpass", "", "Database password") // 880106Postgres
 	dbPort := flag.String("dbport", "5432", "Database port")
 	dbSSL := flag.String("dbssl", "disable", "Database ssl settings (disable, prefer, require)")
 

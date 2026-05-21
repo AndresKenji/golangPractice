@@ -2,39 +2,106 @@ package infrastructure
 
 import (
 	"os"
+	"encoding/json"
+
 	"todolist/domain/task"
+
 )
 
-func validateFile(path string) error {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+func checkFileExists(path string) (error, *os.File) {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
 		file, err := os.Create(path)
 		if err != nil {
-			return err
+			return err, nil
 		}
-		defer file.Close()
+		return nil, file
+	} else if err != nil {
+		return err, nil
+	} else {
+		file, err := os.Open(path)
+		if err != nil {
+			return err, nil
+		}
+		return nil, file
 	}
-	return nil
 }
 
 type In_memory_task_repository struct {
 	Path string `default:"db.json" json:"path"`
 }
 
-func (r *In_memory_task_repository)CreateTask(task *task.Task) error {
-	if err := validateFile(r.Path); err != nil {
+func (r *In_memory_task_repository) CreateTask(task *task.Task) error {
+	err, file := checkFileExists(r.Path)
+	if err != nil {
 		return err
 	}
+	defer file.Close()
 
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(task)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (r *In_memory_task_repository)GetTaskByName(name string) (*task.Task, error)
+func (r *In_memory_task_repository) GetTaskByName(name string) (*task.Task, error) {
+	file, err := os.Open(r.Path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
 
-func (r *In_memory_task_repository)UpdateTask(task *task.Task) error
+	var tasks []*task.Task
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&tasks)
+	if err != nil {
+		return nil, err
+	}
 
-func (r *In_memory_task_repository)SaveTask(task *task.Task) error
+	for _, t := range tasks {
+		if t.Name == name {
+			return t, nil
+		}
+	}
 
-func (r *In_memory_task_repository)DeleteTask(name string) error
+	return nil, nil
+}
 
-func (r *In_memory_task_repository)ListTasks() ([]*task.Task, error)
+func (r *In_memory_task_repository) UpdateTask(task *task.Task) error {
+	file, err := os.Open(r.Path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	var tasks []*task.Task
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&tasks)
+	if err != nil {
+		return err
+	}
+
+	for i, t := range tasks {
+		if t.ID == task.ID {
+			tasks[i] = task
+			break
+		}
+	}
+
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(task)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *In_memory_task_repository) SaveTask(task *task.Task) error
+
+func (r *In_memory_task_repository) DeleteTask(name string) error
+
+func (r *In_memory_task_repository) ListTasks() ([]*task.Task, error)

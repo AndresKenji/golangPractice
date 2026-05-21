@@ -9,6 +9,7 @@ import (
 )
 
 var Db *sql.DB
+
 // Connect: función para conectar a la base de datos
 func Connect() {
 	errorVariables := godotenv.Load()
@@ -27,8 +28,6 @@ func CloseConnection() {
 	Db.Close()
 }
 
-
-
 //go get github.com/joho/godotenv
 //go get github.com/go-sql-driver/mysql
 /*
@@ -41,6 +40,3 @@ fecha datetime NOT NULL,
 PRIMARY KEY (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 */
-
-
-

@@ -34,11 +34,11 @@ func vmMksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	out, err := json.Marshal(WmksResponse{
-		Ticket: ticket.Ticket,
-		Host: ticket.Host,
-		VmName: VmName,
-		Port: ticket.Port,
-		URL: ticket.Url,
+		Ticket:  ticket.Ticket,
+		Host:    ticket.Host,
+		VmName:  VmName,
+		Port:    ticket.Port,
+		URL:     ticket.Url,
 		Vcenter: VcName,
 	})
 	if err != nil {
@@ -55,7 +55,6 @@ func consoleProxyWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	VcName := r.URL.Query().Get("vcenter")
 	vcHost := r.URL.Query().Get("host")
 	token := r.URL.Query().Get("token")
-
 
 	// if VmName == "" || VcName == "" {
 	// 	http.Error(w, "vmname and vcenter are required", http.StatusBadRequest)
@@ -79,7 +78,7 @@ func consoleProxyWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	targetURL := fmt.Sprintf("wss://%s/ticket/%s",vcHost,token)
+	targetURL := fmt.Sprintf("wss://%s/ticket/%s", vcHost, token)
 
 	headers := http.Header{
 		"User-Agent":             r.Header["User-Agent"],
@@ -106,7 +105,7 @@ func consoleProxyWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		Proxy:             http.ProxyFromEnvironment,
 		EnableCompression: true,
 		HandshakeTimeout:  25 * time.Second,
-		TLSClientConfig: tlsConfig,
+		TLSClientConfig:   tlsConfig,
 	}
 
 	connBackend, response, err := wsDialer.Dial(targetURL, headers)
@@ -136,7 +135,7 @@ func consoleProxyWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer connClient.Close()
 
-	log.Println("Iniciando streaming a:",targetURL)
+	log.Println("Iniciando streaming a:", targetURL)
 
 	// Proxy bidireccional
 	go func() {

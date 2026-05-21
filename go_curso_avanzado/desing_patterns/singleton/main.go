@@ -7,9 +7,10 @@ import (
 )
 
 type Database struct{}
-func (Database) CreateSingleConnection(){
+
+func (Database) CreateSingleConnection() {
 	fmt.Println("Creating singleton for Database")
-	time.Sleep(2 *time.Second)
+	time.Sleep(2 * time.Second)
 	fmt.Println("Creation Done")
 }
 
@@ -34,7 +35,7 @@ func main() {
 	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
-		go func ()  {
+		go func() {
 			defer wg.Done()
 			getDatabaseInstance()
 		}()

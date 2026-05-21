@@ -17,8 +17,8 @@ var (
 )
 
 var (
-	host = flag.String("h","localhost","host")
-	port = flag.Int("p",4090,"port")
+	host = flag.String("h", "localhost", "host")
+	port = flag.Int("p", 4090, "port")
 )
 
 // Client1 -> server -> HandleConnection(Client1)
@@ -28,21 +28,20 @@ func HandleConnection(conn net.Conn) {
 	go MessageWrite(conn, message)
 	clientName := conn.RemoteAddr().String()
 
-	message <- fmt.Sprintf("Welcome to the server, your name %s\n",clientName)
-	messages <- fmt.Sprintf("New client %s has arrived!",clientName)
+	message <- fmt.Sprintf("Welcome to the server, your name %s\n", clientName)
+	messages <- fmt.Sprintf("New client %s has arrived!", clientName)
 	incomingClients <- message
 
 	inputMessage := bufio.NewScanner(conn)
 	for inputMessage.Scan() {
-		messages <- fmt.Sprintf("%s: %s\n",clientName, inputMessage.Text())
+		messages <- fmt.Sprintf("%s: %s\n", clientName, inputMessage.Text())
 	}
 
 	leavingClients <- message
 	messages <- fmt.Sprintf("%s said GoodBye!", clientName)
 }
 
-
-func MessageWrite(conn net.Conn, messages <- chan string) {
+func MessageWrite(conn net.Conn, messages <-chan string) {
 	for message := range messages {
 		fmt.Fprintln(conn, message)
 	}
@@ -52,28 +51,27 @@ func Broadcast() {
 	clients := make(map[Client]bool)
 	for {
 		select {
-			case message := <- messages:
-				for client := range clients {
-					client <- message
-				}
-			case newClient := <- incomingClients:
-				clients[newClient] = true
-			
-			case leavingClient := <- leavingClients:
-				delete(clients, leavingClient)
-				close(leavingClient)
-			
+		case message := <-messages:
+			for client := range clients {
+				client <- message
+			}
+		case newClient := <-incomingClients:
+			clients[newClient] = true
+
+		case leavingClient := <-leavingClients:
+			delete(clients, leavingClient)
+			close(leavingClient)
+
 		}
 	}
 }
 
-
 func main() {
-	listener, err := net.Listen("tcp",fmt.Sprintf("%s:%d", *host, *port))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *host, *port))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	
+
 	go Broadcast()
 	for {
 		conn, err := listener.Accept()

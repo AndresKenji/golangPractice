@@ -16,10 +16,10 @@ func (c *AppConfig) RegisterRoutes() http.Handler {
 }
 
 type WmksResponse struct {
-	Ticket string `json:"ticket"`
-	Host string `json:"host"`
-	VmName string `json:"vmname"`
-	Port int32 `json:"port"`
-	URL string `json:"url"`
-	Vcenter  string`json:"vcenter"`
+	Ticket  string `json:"ticket"`
+	Host    string `json:"host"`
+	VmName  string `json:"vmname"`
+	Port    int32  `json:"port"`
+	URL     string `json:"url"`
+	Vcenter string `json:"vcenter"`
 }

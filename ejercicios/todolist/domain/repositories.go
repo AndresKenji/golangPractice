@@ -1,6 +1,6 @@
 package domain
 
-type TaskRepository interface  {
+type TaskRepository interface {
 	CreateTask(task *Task) error
 	GetTaskByName(name string) (*Task, error)
 	UpdateTask(task *Task) error

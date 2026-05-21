@@ -37,7 +37,7 @@ func (i *Item) register(observer Observer) {
 	i.observers = append(i.observers, observer)
 }
 
-func (i *Item) broadcast(){
+func (i *Item) broadcast() {
 	for _, observer := range i.observers {
 		observer.updateValue(i.name)
 	}
@@ -52,7 +52,7 @@ func (e *EmailClient) getId() string {
 }
 
 func (e *EmailClient) updateValue(value string) {
-	fmt.Printf("Sending Email - %s available from client %s\n",value, e.id)
+	fmt.Printf("Sending Email - %s available from client %s\n", value, e.id)
 }
 
 func main() {
@@ -66,6 +66,5 @@ func main() {
 	nvidiaItem.register(firstObserver)
 	nvidiaItem.register(secondObserver)
 	nvidiaItem.UpdateAvailable()
-
 
 }

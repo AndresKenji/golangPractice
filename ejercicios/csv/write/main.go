@@ -15,11 +15,11 @@ func main() {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	headers := []string{"name","age","gender"}
+	headers := []string{"name", "age", "gender"}
 	data := [][]string{
-		{"Alice","25","Female"},
-		{"Oscar","37","Male"},
-		{"Leidy","40","Female"},
+		{"Alice", "25", "Female"},
+		{"Oscar", "37", "Male"},
+		{"Leidy", "40", "Female"},
 	}
 	writer.Write(headers)
 	for _, row := range data {

@@ -53,7 +53,5 @@ func (vc *Vcenter) GetWmksParams(vmName string) (*types.VirtualMachineTicket, er
 		return nil, err
 	}
 
-	
 	return mksTicket, nil
 }
-

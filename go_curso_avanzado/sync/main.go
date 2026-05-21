@@ -15,7 +15,7 @@ func Deposit(amount int, wg *sync.WaitGroup, lock *sync.RWMutex) {
 	b := balance
 	balance = b + amount
 	lock.Unlock()
-	
+
 }
 
 func Balance(lock *sync.RWMutex) int {
@@ -33,7 +33,7 @@ func main() {
 	var lock sync.RWMutex
 	for i := 1; i <= 5; i++ {
 		wg.Add(1)
-		go Deposit(i * 100, &wg, &lock)
+		go Deposit(i*100, &wg, &lock)
 	}
 
 	wg.Wait()

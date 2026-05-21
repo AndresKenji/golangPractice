@@ -18,32 +18,32 @@ var wsDialer = websocket.Dialer{
 		//InsecureSkipVerify: true,
 	},
 	EnableCompression: true,
-	HandshakeTimeout: 25 * time.Second,
+	HandshakeTimeout:  25 * time.Second,
 }
 
 func loadTLSConfig(certFile, keyFile, caFile string) (*tls.Config, error) {
-    cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-    if err != nil {
-        return nil, err
-    }
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, err
+	}
 
-    config := &tls.Config{
-        Certificates:       []tls.Certificate{cert},
-        MinVersion:         tls.VersionTLS12,
-        CipherSuites:       []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384},
-        ServerName:         "cloudconsole.ifxcorp.com",
-        InsecureSkipVerify: true,  // Temporal para pruebas
-    }
+	config := &tls.Config{
+		Certificates:       []tls.Certificate{cert},
+		MinVersion:         tls.VersionTLS12,
+		CipherSuites:       []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384},
+		ServerName:         "cloudconsole.ifxcorp.com",
+		InsecureSkipVerify: true, // Temporal para pruebas
+	}
 
-    if caFile != "" {
-        caCert, _ := os.ReadFile(caFile)
-        caCertPool := x509.NewCertPool()
-        caCertPool.AppendCertsFromPEM(caCert)
-        config.RootCAs = caCertPool
-        config.InsecureSkipVerify = false  // Solo si el CA es válido
-    }
+	if caFile != "" {
+		caCert, _ := os.ReadFile(caFile)
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		config.RootCAs = caCertPool
+		config.InsecureSkipVerify = false // Solo si el CA es válido
+	}
 
-    return config, nil
+	return config, nil
 }
 
 func wsProxy(w http.ResponseWriter, r *http.Request) {
@@ -56,21 +56,21 @@ func wsProxy(w http.ResponseWriter, r *http.Request) {
 
 	// Copia las cabeceras del cliente
 	headers := http.Header{
-		"User-Agent":          r.Header["User-Agent"],
-		"Origin":              r.Header["Origin"],
-		"Cookie":              r.Header["Cookie"],
+		"User-Agent":             r.Header["User-Agent"],
+		"Origin":                 r.Header["Origin"],
+		"Cookie":                 r.Header["Cookie"],
 		"Sec-WebSocket-Protocol": []string{"binary"},
-		"Host":                []string{"cloudconsole.ifxcorp.com:9500"},  // <--- Nuevo
+		"Host":                   []string{"cloudconsole.ifxcorp.com:9500"}, // <--- Nuevo
 	}
-	
+
 	// Copia headers de autenticación si existen
 	if auth := r.Header.Get("Authorization"); auth != "" {
 		headers.Set("Authorization", auth)
 	}
 	headers.Set("Pragma", "no-cache")
 	headers.Set("Cache-Control", "no-cache")
-	headers.Set("Host", "cloudconsole.ifxcorp.com:9500")  // Necesario para enrutamiento
-	
+	headers.Set("Host", "cloudconsole.ifxcorp.com:9500") // Necesario para enrutamiento
+
 	// Cargar el certificado y la clave para la conexión TLS
 	tlsConfig, err := loadTLSConfig("./ifxcorp.crt", "./ifxcorp.key", "")
 	if err != nil {
@@ -99,7 +99,7 @@ func wsProxy(w http.ResponseWriter, r *http.Request) {
 	// Actualizar la conexión del cliente
 	upgrader := websocket.Upgrader{
 		CheckOrigin:     func(r *http.Request) bool { return true },
-		Subprotocols:    []string{"binary"},  // <--- Clave para VMware
+		Subprotocols:    []string{"binary"}, // <--- Clave para VMware
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
@@ -137,12 +137,12 @@ func wsProxy(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    log.Println("Iniciando proxy...")
-    http.HandleFunc("/", wsProxy)
-    server := &http.Server{
-        Addr: ":8080",
-        ReadTimeout: 15 * time.Second,
-        WriteTimeout: 15 * time.Second,
-    }
-    log.Fatal(server.ListenAndServe())
+	log.Println("Iniciando proxy...")
+	http.HandleFunc("/", wsProxy)
+	server := &http.Server{
+		Addr:         ":8080",
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+	}
+	log.Fatal(server.ListenAndServe())
 }

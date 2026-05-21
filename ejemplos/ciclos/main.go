@@ -68,18 +68,18 @@ func main() {
 	// 6. FOR con range - Arrays
 	fmt.Println("6. FOR con range - Arrays:")
 	colores := [4]string{"rojo", "verde", "azul", "amarillo"}
-	
+
 	fmt.Println("   Índices y valores:")
 	for indice, valor := range colores {
 		fmt.Printf("   [%d]: %s\n", indice, valor)
 	}
-	
+
 	fmt.Print("   Solo valores: ")
 	for _, valor := range colores {
 		fmt.Printf("%s ", valor)
 	}
 	fmt.Println()
-	
+
 	fmt.Print("   Solo índices: ")
 	for indice := range colores {
 		fmt.Printf("%d ", indice)
@@ -90,7 +90,7 @@ func main() {
 	// 7. FOR con range - Slices
 	fmt.Println("7. FOR con range - Slices:")
 	numeros := []int{10, 20, 30, 40, 50}
-	
+
 	fmt.Print("   Suma de elementos: ")
 	suma := 0
 	for _, numero := range numeros {
@@ -108,7 +108,7 @@ func main() {
 		"Elena":  22,
 		"Diego":  28,
 	}
-	
+
 	fmt.Println("   Personas y edades:")
 	for nombre, edad := range edades {
 		fmt.Printf("   %s tiene %d años\n", nombre, edad)
@@ -118,7 +118,7 @@ func main() {
 	// 9. FOR con range - Strings (caracteres)
 	fmt.Println("9. FOR con range - Strings:")
 	palabra := "Golang"
-	
+
 	fmt.Println("   Caracteres por posición:")
 	for indice, caracter := range palabra {
 		fmt.Printf("   [%d]: %c (Unicode: %d)\n", indice, caracter, caracter)
@@ -153,7 +153,7 @@ func main() {
 		{4, 5, 6},
 		{7, 8, 9},
 	}
-	
+
 	objetivo := 5
 	encontrado := false
 
@@ -168,7 +168,7 @@ buscar:
 			}
 		}
 	}
-	
+
 	if !encontrado {
 		fmt.Printf("   No se encontró %d\n", objetivo)
 	}
@@ -177,7 +177,7 @@ buscar:
 	// 13. FOR con channels (ejemplo básico)
 	fmt.Println("13. FOR con channels:")
 	canal := make(chan int, 5)
-	
+
 	// Enviar datos al canal
 	go func() {
 		for i := 1; i <= 5; i++ {
@@ -185,7 +185,7 @@ buscar:
 		}
 		close(canal)
 	}()
-	
+
 	fmt.Print("   Cuadrados recibidos del canal: ")
 	for valor := range canal {
 		fmt.Printf("%d ", valor)
@@ -196,17 +196,17 @@ buscar:
 	// 14. Diferentes formas de iterar un slice
 	fmt.Println("14. Diferentes formas de iterar un slice:")
 	frutas := []string{"manzana", "banana", "naranja", "uva"}
-	
+
 	fmt.Println("   Método 1 - FOR tradicional:")
 	for i := 0; i < len(frutas); i++ {
 		fmt.Printf("   [%d]: %s\n", i, frutas[i])
 	}
-	
+
 	fmt.Println("   Método 2 - FOR con range:")
 	for i, fruta := range frutas {
 		fmt.Printf("   [%d]: %s\n", i, fruta)
 	}
-	
+
 	fmt.Println("   Método 3 - Solo valores:")
 	for _, fruta := range frutas {
 		fmt.Printf("   %s ", fruta)
@@ -221,7 +221,7 @@ buscar:
 		fmt.Printf("%d ", i)
 	}
 	fmt.Println()
-	
+
 	fmt.Print("   Array en orden inverso: ")
 	for i := len(frutas) - 1; i >= 0; i-- {
 		fmt.Printf("%s ", frutas[i])
@@ -238,7 +238,7 @@ buscar:
 		{"Diego", 88},
 		{"Sofia", 95},
 	}
-	
+
 	fmt.Println("   Estudiantes con calificación >= 85:")
 	aprobados := 0
 	for _, estudiante := range estudiantes {
@@ -253,17 +253,17 @@ buscar:
 	// 17. Ejemplo práctico: Búsqueda y modificación
 	fmt.Println("17. Ejemplo práctico: Búsqueda y modificación:")
 	inventario := map[string]int{
-		"laptops":  10,
-		"ratones":  25,
-		"teclados": 15,
+		"laptops":   10,
+		"ratones":   25,
+		"teclados":  15,
 		"monitores": 8,
 	}
-	
+
 	fmt.Println("   Inventario original:")
 	for producto, cantidad := range inventario {
 		fmt.Printf("   %s: %d unidades\n", producto, cantidad)
 	}
-	
+
 	// Actualizar inventario
 	fmt.Println("   Aplicando descuentos (restando 2 unidades):")
 	for producto := range inventario {
@@ -271,7 +271,7 @@ buscar:
 			inventario[producto] -= 2
 		}
 	}
-	
+
 	for producto, cantidad := range inventario {
 		fmt.Printf("   %s: %d unidades\n", producto, cantidad)
 	}

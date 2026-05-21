@@ -3,19 +3,21 @@ package domain
 import "time"
 
 type Task struct {
-	Name     string `json:"name"`
-	Detail    string `json:"detail"`
-	CreatedAt time.Time   `json:"created_at"`
-	FinishedAt time.Time   `json:"finished_at"`
-	Status  TaskStatus  `json:"status"`
+	ID         int        `json:"id"`
+	UserID     int        `json:"user_id"`
+	Name       string     `json:"name"`
+	Detail     string     `json:"detail"`
+	CreatedAt  time.Time  `json:"created_at"`
+	FinishedAt time.Time  `json:"finished_at"`
+	Status     TaskStatus `json:"status"`
 }
 
 func NewTask(name, detail string) *Task {
 	return &Task{
-		Name: name,
-		Detail: detail,
+		Name:      name,
+		Detail:    detail,
 		CreatedAt: time.Now(),
-		Status: Pending,
+		Status:    Pending,
 	}
 }
 
@@ -26,5 +28,3 @@ func (t *Task) Complete() {
 	t.Status = Completed
 	t.FinishedAt = time.Now()
 }
-
-

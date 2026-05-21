@@ -72,7 +72,6 @@ func printNameAndStock(p IProduct) {
 	fmt.Printf("Product name: %s, with stock %d \n", p.getName(), p.getStock())
 }
 
-
 func main() {
 	laptop, _ := GetComputerFactory("laptop")
 	desktop, _ := GetComputerFactory("desktop")

@@ -62,7 +62,6 @@ func Create(nombre, correo, telefono string) {
 	fmt.Printf("Cliente creado con ID: %d\n", id)
 }
 
-
 func Update(id int, nombre, correo, telefono string) {
 	connect.Connect()
 	defer connect.CloseConnection()
@@ -95,6 +94,7 @@ func Delete(id int) {
 
 var ID int
 var nombres, correos, telefonos string
+
 func ExecuteTransaction() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -108,7 +108,7 @@ func ExecuteTransaction() {
 		fmt.Println("6. Salir")
 		fmt.Print("\nIngrese el número de la opción deseada: ")
 		if scanner.Scan() {
-		if scanner.Text() == "1" {
+			if scanner.Text() == "1" {
 				List()
 				break
 			}

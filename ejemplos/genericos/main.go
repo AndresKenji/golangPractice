@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-//func PrintList(list ...interface{}){} // Manera de recibir distiontos tipos de dato desde una función
+// func PrintList(list ...interface{}){} // Manera de recibir distiontos tipos de dato desde una función
 func PrintList(list ...any) {
 	for _, value := range list {
 		fmt.Printf("Variable de tipo %T con valor %v \n", value, value)

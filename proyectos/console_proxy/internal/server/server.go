@@ -21,6 +21,6 @@ func NewServer(cfg *AppConfig) *http.Server {
 		Handler:      chain(appConfig.RegisterRoutes()),
 		ReadTimeout:  time.Duration(appConfig.ReadTimeout) * time.Minute,
 		WriteTimeout: time.Duration(appConfig.WriteTimeout) * time.Minute,
-		IdleTimeout: time.Minute * 30,
+		IdleTimeout:  time.Minute * 30,
 	}
 }

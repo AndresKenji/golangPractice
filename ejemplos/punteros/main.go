@@ -31,7 +31,7 @@ func main() {
 	var punteroNulo *int
 	fmt.Printf("   Puntero nulo: %v\n", punteroNulo)
 	fmt.Printf("   ¿Es nil? %t\n", punteroNulo == nil)
-	
+
 	// Verificación antes de desreferenciar
 	if punteroNulo != nil {
 		fmt.Printf("   Valor: %d\n", *punteroNulo)
@@ -103,7 +103,7 @@ func main() {
 
 	fmt.Printf("   Arreglo original: %v\n", arreglo)
 	fmt.Printf("   Primer elemento por puntero: %d\n", punteroArreglo[0])
-	
+
 	// Modificar a través del puntero
 	punteroArreglo[0] = 100
 	fmt.Printf("   Arreglo después de modificar: %v\n", arreglo)
@@ -113,10 +113,10 @@ func main() {
 	fmt.Println("10. Slices y punteros:")
 	slice := []int{10, 20, 30}
 	fmt.Printf("   Slice original: %v\n", slice)
-	
+
 	modificarSlice(slice) // Los slices se pasan por referencia por defecto
 	fmt.Printf("   Slice después de modificar: %v\n", slice)
-	
+
 	// Puntero al slice completo
 	punteroSlice := &slice
 	*punteroSlice = append(*punteroSlice, 40, 50)
@@ -155,7 +155,7 @@ func main() {
 	fmt.Println("13. Funciones que retornan punteros:")
 	pEntero := crearEntero(999)
 	fmt.Printf("   Valor creado: %d\n", *pEntero)
-	
+
 	pPersona := crearPersona("Ana", 25)
 	fmt.Printf("   Persona creada: %s, %d años\n", pPersona.Nombre, pPersona.Edad)
 	fmt.Println()
@@ -164,10 +164,10 @@ func main() {
 	fmt.Println("14. Métodos con receptores por puntero:")
 	contador := Contador{valor: 0}
 	fmt.Printf("   Valor inicial: %d\n", contador.valor)
-	
+
 	contador.Incrementar() // Modifica el receptor
 	fmt.Printf("   Después de incrementar: %d\n", contador.valor)
-	
+
 	valorSinModificar := contador.ObtenerValor() // No modifica el receptor
 	fmt.Printf("   Valor obtenido: %d\n", valorSinModificar)
 	fmt.Println()
@@ -176,10 +176,10 @@ func main() {
 	fmt.Println("15. Información de punteros con unsafe:")
 	arr := [3]int{100, 200, 300}
 	ptr := &arr[0]
-	
+
 	fmt.Printf("   Dirección del primer elemento: %p\n", ptr)
 	fmt.Printf("   Tamaño de int: %d bytes\n", unsafe.Sizeof(int(0)))
-	
+
 	// En Go no hay aritmética de punteros directa como en C/C++
 	// Se debe usar unsafe para operaciones avanzadas (no recomendado)
 	fmt.Printf("   Valor en la dirección: %d\n", *ptr)
@@ -190,7 +190,7 @@ func main() {
 	lista := &Nodo{Dato: 1, Siguiente: nil}
 	lista.Siguiente = &Nodo{Dato: 2, Siguiente: nil}
 	lista.Siguiente.Siguiente = &Nodo{Dato: 3, Siguiente: nil}
-	
+
 	fmt.Print("   Lista: ")
 	imprimirLista(lista)
 	fmt.Println()
@@ -199,11 +199,11 @@ func main() {
 	fmt.Println("17. Punteros en maps:")
 	mapa := make(map[string]*int)
 	num1, num2, num3 := 10, 20, 30
-	
+
 	mapa["uno"] = &num1
 	mapa["dos"] = &num2
 	mapa["tres"] = &num3
-	
+
 	for clave, puntero := range mapa {
 		fmt.Printf("   %s: %d (dirección: %p)\n", clave, *puntero, puntero)
 	}
