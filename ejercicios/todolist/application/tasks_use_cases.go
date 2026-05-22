@@ -1,14 +1,13 @@
 package application
 
 import (
-	"todolist/domain/task"
+	"todolist/domain"
 )
 
-
 type LoadTasksUseCase struct {
-	TaskRepo task.TaskRepository
+	TaskRepo domain.TaskRepository
 }
 
-func (uc *LoadTasksUseCase) Execute() (*task.Task, error) {
+func (uc *LoadTasksUseCase) Execute() ([]*domain.Task, error) {
 	return uc.TaskRepo.ListTasks()
 }

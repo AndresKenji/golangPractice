@@ -1,47 +1,84 @@
 package infrastructure
 
 import (
-	"os"
 	"encoding/json"
+	"errors"
+	"os"
+	"strings"
 
-	"todolist/domain/task"
-
+	"todolist/domain"
 )
-
-func checkFileExists(path string) (error, *os.File) {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		file, err := os.Create(path)
-		if err != nil {
-			return err, nil
-		}
-		return nil, file
-	} else if err != nil {
-		return err, nil
-	} else {
-		file, err := os.Open(path)
-		if err != nil {
-			return err, nil
-		}
-		return nil, file
-	}
-}
 
 type In_memory_task_repository struct {
 	Path string `default:"db.json" json:"path"`
 }
 
+func (r *In_memory_task_repository) dbPath() string {
+	if strings.TrimSpace(r.Path) == "" {
+		return "db.json"
+	}
 
-func (r *In_memory_task_repository) GetTaskByName(name string) (*task.Task, error) {
-	err, file := checkFileExists(r.Path)
+	return r.Path
+}
+
+func (r *In_memory_task_repository) ensureDBFile() error {
+	path := r.dbPath()
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return os.WriteFile(path, []byte("[]"), 0644)
+	}
+
+	return err
+}
+
+func (r *In_memory_task_repository) loadTasks() ([]*domain.Task, error) {
+	err := r.ensureDBFile()
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := os.ReadFile(r.dbPath())
+	if err != nil {
+		return nil, err
+	}
+
+	if len(strings.TrimSpace(string(data))) == 0 {
+		return []*domain.Task{}, nil
+	}
+
+	var tasks []*domain.Task
+	err = json.Unmarshal(data, &tasks)
+	if err != nil {
+		return nil, err
+	}
+
+	if tasks == nil {
+		return []*domain.Task{}, nil
+	}
+
+	return tasks, nil
+}
+
+func (r *In_memory_task_repository) saveTasks(tasks []*domain.Task) error {
+	err := r.ensureDBFile()
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	var tasks []*task.Task
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&tasks)
+	if tasks == nil {
+		tasks = []*domain.Task{}
+	}
+
+	data, err := json.MarshalIndent(tasks, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(r.dbPath(), data, 0644)
+}
+
+func (r *In_memory_task_repository) GetTaskByName(name string) (*domain.Task, error) {
+	tasks, err := r.loadTasks()
 	if err != nil {
 		return nil, err
 	}
@@ -55,65 +92,43 @@ func (r *In_memory_task_repository) GetTaskByName(name string) (*task.Task, erro
 	return nil, nil
 }
 
-func (r *In_memory_task_repository) UpdateTask(task *task.Task) error {
-	err, file := checkFileExists(r.Path)
-	if err != nil {
-		return err
+func (r *In_memory_task_repository) UpdateTask(taskToUpdate *domain.Task) error {
+	if taskToUpdate == nil {
+		return errors.New("task is nil")
 	}
-	defer file.Close()
 
-	var tasks []*task.Task
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&tasks)
+	tasks, err := r.loadTasks()
 	if err != nil {
 		return err
 	}
 
+	found := false
 	for i, t := range tasks {
-		if t.ID == task.ID {
-			tasks[i] = task
+		if t.ID == taskToUpdate.ID {
+			tasks[i] = taskToUpdate
+			found = true
 			break
 		}
 	}
 
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(task)
-	if err != nil {
-		return err
+	if !found {
+		return errors.New("task not found")
 	}
 
-	return nil
+	return r.saveTasks(tasks)
 }
 
-func (r *In_memory_task_repository) SaveTasks(tasks []*task.Task) error {
-	err, file := checkFileExists(r.Path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(tasks)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (r *In_memory_task_repository) SaveTasks(tasks []*domain.Task) error {
+	return r.saveTasks(tasks)
 }
 
 func (r *In_memory_task_repository) DeleteTask(name string) error {
-	err, file := checkFileExists(r.Path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	var tasks []*task.Task
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&tasks)
+	tasks, err := r.loadTasks()
 	if err != nil {
 		return err
 	}
 
+	originalLen := len(tasks)
 	for i, t := range tasks {
 		if t.Name == name {
 			tasks = append(tasks[:i], tasks[i+1:]...)
@@ -121,28 +136,13 @@ func (r *In_memory_task_repository) DeleteTask(name string) error {
 		}
 	}
 
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(tasks)
-	if err != nil {
-		return err
+	if len(tasks) == originalLen {
+		return errors.New("task not found")
 	}
 
-	return nil
+	return r.saveTasks(tasks)
 }
 
-func (r *In_memory_task_repository) ListTasks() ([]*task.Task, error){
-	err, file := checkFileExists(r.Path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var tasks []*task.Task
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&tasks)
-	if err != nil {
-		return nil, err
-	}
-
-	return tasks, nil
+func (r *In_memory_task_repository) ListTasks() ([]*domain.Task, error) {
+	return r.loadTasks()
 }
