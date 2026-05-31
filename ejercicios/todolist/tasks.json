@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "name": "Sacar La basura",
+    "detail": "El Miercoles debes sacar la basura",
+    "created_at": "2026-05-31T14:14:15.0986666-05:00",
+    "finished_at": "0001-01-01T00:00:00Z",
+    "status": "pending"
+  }
+]
